@@ -42,9 +42,10 @@ export default function FeaturesSection() {
               key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -8, scale: 1.02, transition: { type: "spring", stiffness: 400, damping: 10 } }}
               transition={{ delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="p-8 rounded-3xl border border-border/50 bg-card/20 backdrop-blur-sm group hover:border-primary/30 transition-all"
+              className="p-10 rounded-[32px] border border-border/40 bg-card/20 backdrop-blur-xl group hover:border-primary/40 hover:bg-card/30 hover:shadow-[0_0_30px_rgba(14,165,233,0.1)] transition-all relative overflow-hidden"
             >
               <div className={`h-12 w-12 rounded-2xl ${item.color} flex items-center justify-center mb-6`}>
                 <item.icon className="h-6 w-6" />
