@@ -76,6 +76,10 @@ const ChatBubble = ({ msg, isLast }: { msg: Message, isLast: boolean }) => {
             TX: {msg.txId}
           </motion.div>
         )}
+
+        {msg.roadmap && isDone && (
+          <JourneyRoadmap events={msg.roadmap} />
+        )}
       </div>
     </motion.div>
   );
