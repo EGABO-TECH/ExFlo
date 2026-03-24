@@ -185,7 +185,7 @@ export default function Plan() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 sm:p-8 pb-72">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-8 pb-[380px] scroll-smooth">
         <div className="max-w-3xl mx-auto flex flex-col gap-8">
           <AnimatePresence initial={false}>
             {messages.map((msg, i) => (
@@ -220,7 +220,7 @@ export default function Plan() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="max-w-[420px] ml-14 rounded-3xl border border-primary/20 bg-card/80 backdrop-blur-2xl p-8 shadow-2xl overflow-hidden relative"
+                    className="max-w-[420px] mx-auto md:ml-14 rounded-3xl border border-primary/20 bg-card/80 backdrop-blur-2xl p-8 shadow-2xl overflow-hidden relative"
                 >
                     <div className="absolute top-0 right-0 p-6 opacity-[0.03]">
                        <Plane className="h-24 w-24 -rotate-45" />
@@ -277,7 +277,8 @@ export default function Plan() {
                 </motion.div>
             )}
           </AnimatePresence>
-          <div ref={endRef} />
+           <div className="h-40" /> {/* Dedicated visibility spacer */}
+           <div ref={endRef} />
         </div>
       </div>
 
