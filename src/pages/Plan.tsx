@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 // Deployment Cache Bust: 2026-03-25T01:58:00Z
 import { SendHorizontal, Bot, User, ShieldCheck, CreditCard, CheckCircle2, Sparkles, MapPin, Plane } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { JourneyRoadmap } from "../components/JourneyRoadmap";
 
 type Message = {
   role: "assistant" | "user";
@@ -10,6 +11,7 @@ type Message = {
   amount?: string;
   txId?: string;
   isStreaming?: boolean;
+  roadmap?: any[];
 };
 
 // Custom Typewriter Hook
@@ -125,30 +127,44 @@ export default function Plan() {
 
     const isUganda = userMsg.toLowerCase().includes("uganda") || userMsg.toLowerCase().includes("safari") || userMsg.toLowerCase().includes("entebbe");
 
-    // Realistic Agent Orchestration Logic
+    // Ultimate Multi-Agent Orchestration Logic
     setTimeout(() => {
       setIsTyping(false);
-
-      const response1 = isUganda
-        ? "Excellent! I'm initializing the Uganda Tourism Protocol. Scanning flights from Entebbe International (EBB) and checking availability at Kampala Serena Hotel..."
-        : "I'm orchestrating your Flow. Scanning global flight databases and premium accommodation providers for your journey...";
-
+      
+      const response1 = isUganda 
+        ? "SkyFlow Agent initializing Uganda Protocol. Scanning Entebbe International (EBB) flight corridor and StayBot verifying Serena Hotel suites..."
+        : "Agentic Cluster initializing. Global orchestration layer scanning multi-modal logistics for your Flow...";
+      
       setMessages((prev) => [...prev, { role: "assistant", content: response1, isStreaming: true }]);
-
+      
       setIsTyping(true);
       setTimeout(() => {
         setIsTyping(false);
-
+        
         const response2 = isUganda
-          ? "I've locked in an exquisite 5-day itinerary: Flight UR402, 3 nights at Chobe Safari Lodge, and a private game drive in Murchison Falls. Everything is ready for checkout."
-          : "I've optimized your itinerary for zero friction. Routes and stays are reserved. Would you like to proceed to secure this Flow via MiniPay?";
+          ? "Orchestration complete. I've successfully converged your journey across three specialized agents. Your interactive Flow roadmap is ready for final review."
+          : "Flow convergence achieved. Logistics are locked and verified across the network. Review your personalized journey Roadmap below.";
+        
+        const roadmap = isUganda ? [
+            { type: 'flight', title: 'Flight UR402', details: 'Entebbe International Departure • Business Class Reserved', agent: 'SKYFLOW' },
+            { type: 'hotel', title: 'Chobe Safari Lodge', details: '3 Nights Luxury Suite • River View Authenticated', agent: 'STAYBOT' },
+            { type: 'activity', title: 'Murchison Falls Game Drive', details: 'Private 4x4 Orchestrated • Sunrise Departure', agent: 'LOCALGUIDE' },
+            { type: 'done', title: 'Everything Ready', details: 'All nodes synchronized and ready for blockchain booking.', agent: 'AI PILOT' }
+        ] : [
+            { type: 'flight', title: 'Global Route', details: 'Optimized flight path found with zero-friction connections.', agent: 'SKYFLOW' },
+            { type: 'hotel', title: 'Premium Stay', details: 'Accommodation verified via verified network providers.', agent: 'STAYBOT' },
+            { type: 'done', title: 'Ready for Flow', details: 'Agentic sequence complete.', agent: 'AI PILOT' }
+        ];
 
-        setMessages((prev) => [...prev.map((m, idx) => idx === prev.length - 1 ? { ...m, isStreaming: false } : m), { role: "assistant", content: response2, isStreaming: true }]);
+        setMessages((prev) => [
+            ...prev.map((m, idx) => idx === prev.length - 1 ? { ...m, isStreaming: false } : m), 
+            { role: "assistant", content: response2, isStreaming: true, roadmap: roadmap as any }
+        ]);
 
         if (isUganda) {
           setTimeout(() => {
             setShowCheckout(true);
-          }, 3000); // Wait for typing to finish roughly
+          }, 4500); // Wait for roadmap animation
         }
       }, 3500);
 
