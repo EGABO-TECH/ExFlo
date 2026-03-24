@@ -1,5 +1,6 @@
 import { MapPin, Calendar, CreditCard, Activity, Leaf, Zap, Globe, Clock, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+// Deployment Force Sync: 2026-03-25T02:50:00Z (Delayed Payment Workflow)
 
 export default function Trips() {
   const stats = [
