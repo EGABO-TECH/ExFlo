@@ -131,8 +131,8 @@ export default function Trips() {
                         </div>
                         <div className="flex gap-1.5 ml-2">
                             {trip.agents.map(a => (
-                                <div key={a} className="h-5 w-5 rounded-full border border-border/50 bg-background flex items-center justify-center">
-                                    <Sparkles className="h-2 w-2 text-primary" title={a} />
+                                <div key={a} className="h-5 w-5 rounded-full border border-border/50 bg-background flex items-center justify-center" title={a}>
+                                    <Sparkles className="h-2 w-2 text-primary" />
                                 </div>
                             ))}
                         </div>
