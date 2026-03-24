@@ -1,125 +1,61 @@
 import { motion } from "framer-motion";
-import { Brain, Wallet, ShoppingCart } from "lucide-react";
+import { Bot, Link, CreditCard } from "lucide-react";
 
-const features = [
-  {
-    icon: Brain,
-    title: "The AI Pilot",
-    accent: true,
-    description:
-      "An autonomous agent that provides real-time trip monitoring and automated re-planning. Flight delayed? Booking failed? The Pilot triggers a re-planning loop instantly.",
-    bullets: [
-      "Agentic decision loops via LangChain",
-      "Real-time disruption handling",
-      "Context-aware re-routing",
-    ],
-  },
-  {
-    icon: Wallet,
-    title: "MiniPay Integration",
-    accent: false,
-    description:
-      "Native integration with the MiniPay ecosystem enables frictionless, low-fee cryptocurrency transactions for tourists worldwide.",
-    bullets: [
-      "Near-zero transaction fees",
-      "Global accessibility",
-      "Secure blockchain settlement",
-    ],
-  },
-  {
-    icon: ShoppingCart,
-    title: "One-Booking Engine",
-    accent: false,
-    description:
-      "A unified checkout system. No more jumping between 10 different tabs — ExFlo handles the entire transaction layer through a single orchestration point.",
-    bullets: [
-      "Single-click trip checkout",
-      "Multi-provider aggregation",
-      "Unified confirmation & receipts",
-    ],
-  },
-];
+export default function FeaturesSection() {
+  const innovations = [
+    {
+      title: "AI Pilot",
+      description: "Autonomous Execution",
+      detail: "The Pilot doesn't just suggest; it executes complex travel maneuvers automatically.",
+      icon: Bot,
+      color: "bg-cyan-500/10 text-cyan-400"
+    },
+    {
+      title: "One-Booking Engine",
+      description: "Universal Connectors",
+      detail: "Direct integration with global airline and hospitality APIs for frictionless booking.",
+      icon: Link,
+      color: "bg-purple-500/10 text-purple-400"
+    },
+    {
+      title: "MiniPay Integration",
+      description: "Celo Blockchain",
+      detail: "Secure, stable payments via the Celo blockchain for transparent on-chain settlement.",
+      icon: CreditCard,
+      color: "bg-emerald-500/10 text-emerald-400"
+    }
+  ];
 
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.15 } },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-};
-
-const FeaturesSection = () => {
   return (
-    <section id="ai-pilot" className="py-32">
-      <div className="container">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="font-display text-4xl font-bold sm:text-5xl">
+    <section className="py-24 relative overflow-hidden">
+      <div className="container px-4">
+        <div className="text-center mb-16">
+          <h2 className="font-display text-4xl font-bold tracking-tight mb-4">
             Key <span className="text-gradient-primary">Innovations</span>
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-            Three pillars that make ExFlo the definitive orchestration layer for
-            global tourism.
-          </p>
-        </motion.div>
+          <p className="text-muted-foreground max-w-xl mx-auto">Three pillars that make ExFlo the future of travel.</p>
+        </div>
 
-        <motion.div
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          className="grid gap-6 md:grid-cols-3"
-        >
-          {features.map((f) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {innovations.map((item, i) => (
             <motion.div
-              key={f.title}
-              variants={item}
-              className="group relative rounded-xl border border-border bg-card p-8 transition-all hover:border-primary/30 hover:glow-primary"
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true }}
+              className="p-8 rounded-3xl border border-border/50 bg-card/20 backdrop-blur-sm group hover:border-primary/30 transition-all"
             >
-              <div
-                className={`mb-5 inline-flex rounded-lg p-3 ${
-                  f.accent
-                    ? "bg-gradient-primary"
-                    : "bg-secondary"
-                }`}
-              >
-                <f.icon
-                  className={`h-6 w-6 ${
-                    f.accent ? "text-primary-foreground" : "text-primary"
-                  }`}
-                />
+              <div className={`h-12 w-12 rounded-2xl ${item.color} flex items-center justify-center mb-6`}>
+                <item.icon className="h-6 w-6" />
               </div>
-
-              <h3 className="font-display text-xl font-semibold mb-3">
-                {f.title}
-              </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-5">
-                {f.description}
-              </p>
-
-              <ul className="space-y-2">
-                {f.bullets.map((b) => (
-                  <li
-                    key={b}
-                    className="flex items-center gap-2 text-sm text-secondary-foreground"
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-primary mb-2">{item.title}</h3>
+              <p className="text-xl font-bold mb-3">{item.description}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{item.detail}</p>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
-};
-
-export default FeaturesSection;
+}
