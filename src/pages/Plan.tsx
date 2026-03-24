@@ -51,30 +51,28 @@ const ChatBubble = ({ msg, isLast }: { msg: Message, isLast: boolean }) => {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       className={`flex gap-5 ${msg.role === "assistant" ? "flex-row" : "flex-row-reverse"}`}
     >
-      <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
-        msg.role === "assistant" ? "bg-primary/10 text-primary border border-primary/20" : "bg-card text-muted-foreground border border-border/50"
-      }`}>
+      <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${msg.role === "assistant" ? "bg-primary/10 text-primary border border-primary/20" : "bg-card text-muted-foreground border border-border/50"
+        }`}>
         {msg.role === "assistant" ? <Bot className="h-5 w-5" /> : <User className="h-5 w-5" />}
       </div>
-      <div className={`rounded-2xl px-6 py-4 max-w-[85%] text-[15px] leading-relaxed shadow-sm transition-all duration-300 ${
-        msg.role === "assistant" 
-          ? "bg-card/50 text-foreground border border-border/40 backdrop-blur-sm hover:border-primary/30 hover:bg-card/60" 
+      <div className={`rounded-2xl px-6 py-4 max-w-[85%] text-[15px] leading-relaxed shadow-sm transition-all duration-300 ${msg.role === "assistant"
+          ? "bg-card/50 text-foreground border border-border/40 backdrop-blur-sm hover:border-primary/30 hover:bg-card/60"
           : "bg-primary text-primary-foreground shadow-lg shadow-primary/5 hover:opacity-95"
-      }`}>
+        }`}>
         {msg.role === "assistant" ? displayedText : msg.content}
         {msg.role === "assistant" && !isDone && <span className="inline-block w-1.5 h-4 bg-primary/40 ml-1 animate-pulse align-middle" />}
-        
+
         {msg.type === 'success' && isDone && (
-            <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }}
-                className="mt-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-emerald-400 text-xs font-mono"
-            >
-                <div className="flex items-center gap-2 mb-1 opacity-70">
-                    <ShieldCheck className="h-3 w-3" /> ON-CHAIN VERIFIED
-                </div>
-                TX: {msg.txId}
-            </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-emerald-400 text-xs font-mono"
+          >
+            <div className="flex items-center gap-2 mb-1 opacity-70">
+              <ShieldCheck className="h-3 w-3" /> ON-CHAIN VERIFIED
+            </div>
+            TX: {msg.txId}
+          </motion.div>
         )}
       </div>
     </motion.div>
@@ -105,14 +103,14 @@ export default function Plan() {
   const handleFinalPayment = () => {
     setPaymentStatus("paid");
     setTimeout(() => {
-        setMessages(prev => [...prev.map(m => ({...m, isStreaming: false})), {
-            role: "assistant",
-            content: "Payment successful! Your Uganda Safari Experience has been securely booked on-chain via MiniPay. You can view your itinerary in 'My Trips'.",
-            type: "success",
-            isStreaming: true,
-            txId: "0x" + Math.random().toString(16).slice(2, 10).toUpperCase()
-        }]);
-        setShowCheckout(false);
+      setMessages(prev => [...prev.map(m => ({ ...m, isStreaming: false })), {
+        role: "assistant",
+        content: "Payment successful! Your Uganda Safari Experience has been securely booked on-chain via MiniPay. You can view your itinerary in 'My Trips'.",
+        type: "success",
+        isStreaming: true,
+        txId: "0x" + Math.random().toString(16).slice(2, 10).toUpperCase()
+      }]);
+      setShowCheckout(false);
     }, 1500);
   };
 
@@ -122,7 +120,7 @@ export default function Plan() {
 
     const userMsg = input.trim();
     setInput("");
-    setMessages((prev) => [...prev.map(m => ({...m, isStreaming: false})), { role: "user", content: userMsg }]);
+    setMessages((prev) => [...prev.map(m => ({ ...m, isStreaming: false })), { role: "user", content: userMsg }]);
     setIsTyping(true);
 
     const isUganda = userMsg.toLowerCase().includes("uganda") || userMsg.toLowerCase().includes("safari") || userMsg.toLowerCase().includes("entebbe");
@@ -130,27 +128,27 @@ export default function Plan() {
     // Realistic Agent Orchestration Logic
     setTimeout(() => {
       setIsTyping(false);
-      
-      const response1 = isUganda 
+
+      const response1 = isUganda
         ? "Excellent! I'm initializing the Uganda Tourism Protocol. Scanning flights from Entebbe International (EBB) and checking availability at Kampala Serena Hotel..."
         : "I'm orchestrating your Flow. Scanning global flight databases and premium accommodation providers for your journey...";
-      
+
       setMessages((prev) => [...prev, { role: "assistant", content: response1, isStreaming: true }]);
-      
+
       setIsTyping(true);
       setTimeout(() => {
         setIsTyping(false);
-        
+
         const response2 = isUganda
           ? "I've locked in an exquisite 5-day itinerary: Flight UR402, 3 nights at Chobe Safari Lodge, and a private game drive in Murchison Falls. Everything is ready for checkout."
           : "I've optimized your itinerary for zero friction. Routes and stays are reserved. Would you like to proceed to secure this Flow via MiniPay?";
-        
-        setMessages((prev) => [...prev.map((m, idx) => idx === prev.length -1 ? {...m, isStreaming: false} : m), { role: "assistant", content: response2, isStreaming: true }]);
+
+        setMessages((prev) => [...prev.map((m, idx) => idx === prev.length - 1 ? { ...m, isStreaming: false } : m), { role: "assistant", content: response2, isStreaming: true }]);
 
         if (isUganda) {
-            setTimeout(() => {
-                setShowCheckout(true);
-            }, 3000); // Wait for typing to finish roughly
+          setTimeout(() => {
+            setShowCheckout(true);
+          }, 3000); // Wait for typing to finish roughly
         }
       }, 3500);
 
@@ -158,10 +156,10 @@ export default function Plan() {
   };
 
   const suggestions = [
-      "Plan a 5-day Uganda Safari",
-      "Tokyo Spiritual Retreat",
-      "Beach vacation in Bali",
-      "3-day trip to Barcelona"
+    "Plan a 5-day Uganda Safari",
+    "Tokyo Spiritual Retreat",
+    "Beach vacation in Bali",
+    "3-day trip to Barcelona"
   ];
 
   return (
@@ -208,77 +206,77 @@ export default function Plan() {
                     <span className="text-[11px] font-bold uppercase tracking-wider text-primary/80">Pilot Orchestrating</span>
                   </div>
                   <div className="flex gap-2.5 mt-2">
-                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" />
+                    <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                    <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                    <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" />
                   </div>
                 </div>
               </motion.div>
             )}
 
             {showCheckout && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="max-w-[420px] mx-auto md:ml-14 rounded-3xl border border-primary/20 bg-card/80 backdrop-blur-2xl p-8 shadow-2xl overflow-hidden relative"
-                >
-                    <div className="absolute top-0 right-0 p-6 opacity-[0.03]">
-                       <Plane className="h-24 w-24 -rotate-45" />
-                    </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-[420px] mx-auto md:ml-14 rounded-3xl border border-primary/20 bg-card/80 backdrop-blur-2xl p-8 shadow-2xl overflow-hidden relative"
+              >
+                <div className="absolute top-0 right-0 p-6 opacity-[0.03]">
+                  <Plane className="h-24 w-24 -rotate-45" />
+                </div>
 
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                            <CreditCard className="h-5 w-5 text-primary" />
-                        </div>
-                        <h4 className="font-display font-bold text-xl text-foreground">MiniPay Checkout</h4>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                  </div>
+                  <h4 className="font-display font-bold text-xl text-foreground">MiniPay Checkout</h4>
+                </div>
+
+                <div className="space-y-4 mb-8">
+                  <div className="flex justify-between items-center py-3 border-b border-border/30">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
+                      <MapPin className="h-4 w-4 text-primary/70" /> Uganda Safari Package
                     </div>
-                    
-                    <div className="space-y-4 mb-8">
-                        <div className="flex justify-between items-center py-3 border-b border-border/30">
-                            <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
-                                <MapPin className="h-4 w-4 text-primary/70" /> Uganda Safari Package
-                            </div>
-                            <span className="font-bold text-foreground">1,450 cUSD</span>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground leading-relaxed">
-                            Secured via Celo Blockchain. Includes flights (EBB), stays (Chobe Lodge), and agentic coordination.
-                        </p>
-                    </div>
+                    <span className="font-bold text-foreground">1,450 cUSD</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Secured via Celo Blockchain. Includes flights (EBB), stays (Chobe Lodge), and agentic coordination.
+                  </p>
+                </div>
 
                     {paymentStatus === "pending" && (
                         <button 
                             onClick={handleCheckout}
                             className="w-full bg-gradient-primary text-primary-foreground py-4 rounded-2xl font-bold text-sm shadow-xl shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98]"
                         >
-                            Authorize Payment (1,450 cUSD)
+                            Confirm Booking & Proceed
                         </button>
                     )}
 
-                    {paymentStatus === "confirming" && (
-                        <div className="space-y-4">
-                            <div className="text-center p-4 rounded-2xl bg-primary/5 border border-primary/10">
-                                <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Final Review</p>
-                                <p className="text-sm text-foreground">Approve transfer from your MiniPay wallet?</p>
-                            </div>
-                            <div className="flex gap-3">
-                                <button onClick={() => setPaymentStatus("pending")} className="flex-1 py-3 rounded-xl border border-border text-xs font-bold hover:bg-secondary/50">Cancel</button>
-                                <button onClick={handleFinalPayment} className="flex-1 py-3 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition-all">
-                                    <ShieldCheck className="h-4 w-4" /> Agree & Pay
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                {paymentStatus === "confirming" && (
+                  <div className="space-y-4">
+                    <div className="text-center p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                                <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Secure Payment</p>
+                                <p className="text-sm text-foreground">Authorize transfer from your MiniPay wallet?</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <button onClick={() => setPaymentStatus("pending")} className="flex-1 py-3 rounded-xl border border-border text-xs font-bold hover:bg-secondary/50">Cancel</button>
+                      <button onClick={handleFinalPayment} className="flex-1 py-3 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition-all">
+                        <ShieldCheck className="h-4 w-4" /> Agree & Pay
+                      </button>
+                    </div>
+                  </div>
+                )}
 
-                    {paymentStatus === "paid" && (
-                        <div className="text-center py-2 text-emerald-400 font-bold flex items-center justify-center gap-2 text-sm bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                            <CheckCircle2 className="h-4 w-4" /> Transaction Complete
-                        </div>
-                    )}
-                </motion.div>
+                {paymentStatus === "paid" && (
+                  <div className="text-center py-2 text-emerald-400 font-bold flex items-center justify-center gap-2 text-sm bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                    <CheckCircle2 className="h-4 w-4" /> Transaction Complete
+                  </div>
+                )}
+              </motion.div>
             )}
           </AnimatePresence>
-           <div className="h-40" /> {/* Dedicated visibility spacer */}
-           <div ref={endRef} />
+          <div className="h-40" /> {/* Dedicated visibility spacer */}
+          <div ref={endRef} />
         </div>
       </div>
 
@@ -286,23 +284,23 @@ export default function Plan() {
       <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 pointer-events-none">
         <div className="max-w-3xl mx-auto pointer-events-auto">
           {messages.length === 1 && !isTyping && (
-              <div className="flex flex-wrap gap-2.5 mb-6 justify-center">
-                  {suggestions.map(s => (
-                      <button 
-                        key={s} 
-                        onClick={() => { setInput(s); }}
-                        className="px-4 py-2 rounded-2xl border border-border/30 bg-card/50 text-[11px] font-semibold text-muted-foreground hover:border-primary/40 hover:text-primary transition-all backdrop-blur-xl shadow-sm"
-                      >
-                          {s}
-                      </button>
-                  ))}
-              </div>
+            <div className="flex flex-wrap gap-2.5 mb-6 justify-center">
+              {suggestions.map(s => (
+                <button
+                  key={s}
+                  onClick={() => { setInput(s); }}
+                  className="px-4 py-2 rounded-2xl border border-border/30 bg-card/50 text-[11px] font-semibold text-muted-foreground hover:border-primary/40 hover:text-primary transition-all backdrop-blur-xl shadow-sm"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           )}
-          
+
           <div className="relative group">
             {/* Glossy Wrapper */}
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-[30px] opacity-0 group-focus-within:opacity-100 blur transition duration-500" />
-            
+
             <form onSubmit={handleSubmit} className="relative flex items-end gap-3 bg-card border border-border/60 rounded-[28px] p-2 pl-6 pr-2 shadow-2xl backdrop-blur-3xl overflow-hidden min-h-[64px]">
               <textarea
                 autoFocus
@@ -310,10 +308,10 @@ export default function Plan() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSubmit(e as any);
-                    }
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e as any);
+                  }
                 }}
                 disabled={isTyping || showCheckout}
                 placeholder="Tell the AI Pilot your travel dreams..."
@@ -330,7 +328,7 @@ export default function Plan() {
           </div>
 
           <p className="text-[9px] text-center text-muted-foreground/30 mt-5 uppercase tracking-[0.3em] font-bold">
-             Agentic Protocol • Synchronized with EXFLO NODES
+            Agentic Protocol • Synchronized with EXFLO NODES
           </p>
         </div>
       </div>
