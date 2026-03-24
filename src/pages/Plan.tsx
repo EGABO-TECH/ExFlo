@@ -114,7 +114,7 @@ export default function Plan() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 sm:p-8 pb-48">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-8 pb-72">
         <div className="max-w-3xl mx-auto flex flex-col gap-8">
           <AnimatePresence initial={false}>
             {messages.map((msg, i) => (
@@ -284,7 +284,7 @@ export default function Plan() {
           </div>
 
           <p className="text-[9px] text-center text-muted-foreground/30 mt-5 uppercase tracking-[0.3em] font-bold">
-             Agentic Protocol • Synchronized with EGABO-TECH Nodes
+             Agentic Protocol • Synchronized with EXFLO NODES
           </p>
         </div>
       </div>
