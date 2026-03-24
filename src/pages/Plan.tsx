@@ -177,7 +177,7 @@ export default function Plan() {
             <h1 className="font-display font-bold text-foreground leading-tight">AI Pilot</h1>
             <p className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Agentic Node Online
+              Online — Ready to plan
             </p>
           </div>
         </div>
@@ -314,7 +314,7 @@ export default function Plan() {
                   }
                 }}
                 disabled={isTyping || showCheckout}
-                placeholder="Tell the AI Pilot your travel dreams..."
+                placeholder="Tell me where you want to go..."
                 className="flex-1 bg-transparent border-none outline-none py-3.5 text-[15px] resize-none max-h-32 text-foreground placeholder:text-muted-foreground/60 leading-relaxed scrollbar-hide"
               />
               <button
