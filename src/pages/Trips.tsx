@@ -14,7 +14,14 @@ export default function Trips() {
       dates: "Oct 12 – Oct 17, 2026",
       cost: "1,450 cUSD",
       status: "active",
-      id: "TRP-UG502",
+      agents: ["SkyFlow", "StayBot", "LocalGuide"]
+    },
+    {
+      destination: "Murchison Falls (Reserve)",
+      dates: "Oct 12 – Oct 17, 2026",
+      cost: "1,450 cUSD",
+      status: "pending_payment",
+      id: "RES-UG991",
       agents: ["SkyFlow", "StayBot", "LocalGuide"]
     },
     {
@@ -142,12 +149,18 @@ export default function Trips() {
 
                 <div className="flex items-center justify-between lg:justify-end gap-12 pt-8 lg:pt-0 border-t lg:border-t-0 border-border/20">
                     <div className="text-right">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-2 opacity-50">Authorized Cost</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-2 opacity-50">{trip.status === 'pending_payment' ? 'Pending Settlement' : 'Authorized Cost'}</p>
                     <p className="text-3xl font-display font-bold text-foreground leading-none">{trip.cost}</p>
                     </div>
-                    <button className="h-14 px-8 rounded-2xl bg-secondary/50 border border-border/50 text-xs font-bold hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all group-hover:shadow-[0_0_20px_rgba(14,165,233,0.15)] active:scale-95">
-                        Action Center
-                    </button>
+                    {trip.status === 'pending_payment' ? (
+                        <button className="h-14 px-8 rounded-2xl bg-primary text-primary-foreground border border-primary text-xs font-bold hover:opacity-90 shadow-lg glow-primary transition-all active:scale-95 flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" /> Finalize Payment
+                        </button>
+                    ) : (
+                        <button className="h-14 px-8 rounded-2xl bg-secondary/50 border border-border/50 text-xs font-bold hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all group-hover:shadow-[0_0_20px_rgba(14,165,233,0.15)] active:scale-95">
+                            Action Center
+                        </button>
+                    )}
                 </div>
                 </div>
             </motion.div>

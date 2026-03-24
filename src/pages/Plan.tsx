@@ -111,10 +111,10 @@ export default function Plan() {
     setTimeout(() => {
       setMessages(prev => [...prev.map(m => ({ ...m, isStreaming: false })), {
         role: "assistant",
-        content: "Payment successful! Your Uganda Safari Experience has been securely booked on-chain via MiniPay. You can view your itinerary in 'My Trips'.",
+        content: "Reservation confirmed! Your Uganda Safari Experience has been securely synchronized with your profile. You can now review the recommendations and finalize the settlement via MiniPay in your 'My Trips' dashboard.",
         type: "success",
         isStreaming: true,
-        txId: "0x" + Math.random().toString(16).slice(2, 10).toUpperCase()
+        txId: "RES-" + Math.random().toString(16).slice(2, 10).toUpperCase()
       }]);
       setShowCheckout(false);
     }, 1500);
@@ -268,20 +268,20 @@ export default function Plan() {
                             onClick={handleCheckout}
                             className="w-full bg-gradient-primary text-primary-foreground py-4 rounded-2xl font-bold text-sm shadow-xl shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98]"
                         >
-                            Confirm Booking & Proceed
+                            Confirm & Reserve Journey
                         </button>
                     )}
 
                 {paymentStatus === "confirming" && (
                   <div className="space-y-4">
                     <div className="text-center p-4 rounded-2xl bg-primary/5 border border-primary/10">
-                                <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Secure Payment</p>
-                                <p className="text-sm text-foreground">Authorize transfer from your MiniPay wallet?</p>
+                                <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Secure Reservation</p>
+                                <p className="text-sm text-foreground">Reserve this itinerary and save to your discovery dashboard?</p>
                     </div>
                     <div className="flex gap-3">
                       <button onClick={() => setPaymentStatus("pending")} className="flex-1 py-3 rounded-xl border border-border text-xs font-bold hover:bg-secondary/50">Cancel</button>
                       <button onClick={handleFinalPayment} className="flex-1 py-3 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition-all">
-                        <ShieldCheck className="h-4 w-4" /> Agree & Pay
+                        <ShieldCheck className="h-4 w-4" /> Confirm & Save
                       </button>
                     </div>
                   </div>
@@ -289,7 +289,7 @@ export default function Plan() {
 
                 {paymentStatus === "paid" && (
                   <div className="text-center py-2 text-emerald-400 font-bold flex items-center justify-center gap-2 text-sm bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                    <CheckCircle2 className="h-4 w-4" /> Transaction Complete
+                    <CheckCircle2 className="h-4 w-4" /> Journey Reserved
                   </div>
                 )}
               </motion.div>
