@@ -1,7 +1,7 @@
 <div align="center">
   <img src="public/logo.png" alt="ExFlo Logo" width="300" />
 
-  <h1>🌍 ExFlo: The Agentic AI Ecosystem</h1>
+  <h1> ExFlo: The Agentic AI Ecosystem</h1>
   
   <p><b>A revolutionary autonomous orchestration layer for the global tourism industry.</b></p>
 
@@ -19,20 +19,20 @@
 
 <hr />
 
-## ✨ Key Innovations
+##  Key Innovations
 
-### 🤖 The AI Pilot
+###  The AI Pilot
 Our autonomous agent goes beyond simple suggestions. It provides real-time trip monitoring and automated re-planning. If a flight is delayed or a booking fails, the Pilot triggers a re-planning loop to ensure your journey stays on track without any manual intervention.
 
-### 💸 MiniPay Integration
+###  MiniPay Integration
 Native integration with the **MiniPay ecosystem** allows for frictionless, low-fee cryptocurrency transactions for tourists from anywhere in the world, ensuring true global accessibility.
 
-### 🎟️ One-Booking Engine
+###  One-Booking Engine
 A unified checkout system. No more jumping between 10 different tabs to book flights, hotels, and activities—ExFlo handles the entire transaction layer through a single reliable orchestration point.
 
 ---
 
-## 🏗️ Technical Architecture
+##  Technical Architecture
 
 | Component       | Technology               | Role                                                |
 |:---------------:|:------------------------:|:---------------------------------------------------:|
@@ -43,13 +43,13 @@ A unified checkout system. No more jumping between 10 different tabs to book fli
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 Before you begin, ensure you have the following installed and set up:
-- 🟢 **Node.js**: v18 or newer
-- 💻 **Git Bash**: Recommended for version control on Windows
-- 👛 **Wallet**: A MiniPay-compatible wallet for transactions
+-  **Node.js**: v18 or newer
+-  **Git Bash**: Recommended for version control on Windows
+-  **Wallet**: A MiniPay-compatible wallet for transactions
 
 ### Installation
 1. Clone the repository:
@@ -72,7 +72,7 @@ Before you begin, ensure you have the following installed and set up:
 ---
 
 <div align="center">
-  <h2>🌟 Co-Founders</h2>
+  <h2> Co-Founders</h2>
   <p>The visionary team behind the magic of ExFlo.</p>
 
   <table align="center">
