@@ -15,7 +15,7 @@ const FooterSection = () => {
           
           <div className="flex flex-col gap-6 text-center lg:text-left">
             <div className="flex items-center justify-center lg:justify-start gap-3">
-              <img src="/logo.png" alt="ExFlo Logo" className="h-10 w-auto" />
+              <img src="/ExFlo/logo.png" alt="ExFlo Logo" className="h-10 w-auto" />
               <span className="font-display text-2xl font-bold tracking-tight">
                 Ex<span className="text-gradient-primary">Flo</span>
               </span>

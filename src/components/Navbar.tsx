@@ -10,7 +10,7 @@ const Navbar = () => {
     >
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="ExFlo Logo" className="h-10 w-auto" />
+          <img src="/ExFlo/logo.png" alt="ExFlo Logo" className="h-10 w-auto" />
           <span className="font-display text-2xl font-bold tracking-tight">
             Ex<span className="text-gradient-primary">Flo</span>
           </span>

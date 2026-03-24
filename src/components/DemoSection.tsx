@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, CheckCircle2, Loader2, Compass, ShieldCheck } from "lucide-react";
+import { Send, CheckCircle2, Loader2, Compass, ShieldCheck, CreditCard } from "lucide-react";
 
 const DemoSection = () => {
   const [prompt, setPrompt] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "complete">("idle");
   const [step, setStep] = useState(0);
+  const [paymentStatus, setPaymentStatus] = useState<"pending" | "confirming" | "paid">("pending");
 
   const steps = [
     "Initializing AI Pilot Agent...",
-    "Scanning 5,200 global flights and 12,000 hotels...",
+    "Scanning flights from Entebbe International Airport (EBB)...",
+    "Checking availability at Kampala Serena Hotel & Chobe Safari Lodge...",
     "Drafting instant smart contracts on MiniPay...",
     "Flow Ready."
   ];
@@ -20,6 +22,7 @@ const DemoSection = () => {
     
     setStatus("loading");
     setStep(0);
+    setPaymentStatus("pending");
 
     // Simulate agentic steps
     const interval = setInterval(() => {
@@ -52,7 +55,7 @@ const DemoSection = () => {
           <form onSubmit={handleGenerate} className="flex flex-col gap-4 sm:flex-row">
             <input
               type="text"
-              placeholder="e.g., A 5-day spiritual retreat to Kyoto, using MiniPay..."
+              placeholder="e.g., A 5-day safari to Murchison Falls using MiniPay..."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               disabled={status === "loading"}
@@ -131,46 +134,105 @@ const DemoSection = () => {
                 >
                   <div className="flex items-start justify-between gap-4 mb-6">
                     <div>
-                      <h3 className="font-display text-2xl font-bold text-foreground mb-2">Tokyo Spiritual Retreat</h3>
-                      <p className="text-muted-foreground">Oct 12 - Oct 17 • 2 Travelers • Premium Economy</p>
+                      <h3 className="font-display text-2xl font-bold text-foreground mb-2">Uganda Safari Experience</h3>
+                      <p className="text-muted-foreground">Oct 12 - Oct 17 • 2 Travelers • Murchison Falls</p>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-gradient-primary">1,450 cUSD</div>
                       <p className="text-xs text-muted-foreground mt-1 flex items-center justify-end gap-1">
-                        <ShieldCheck className="h-3 w-3 text-primary" /> Settled via MiniPay
+                        <ShieldCheck className="h-3 w-3 text-primary" /> Multi-Provider Quote
                       </p>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-4 mb-8">
                     <div className="flex items-center gap-4 p-4 rounded-lg bg-background/50 border border-border/50">
                       <div className="h-10 w-10 rounded bg-primary/20 flex items-center justify-center text-xl">✈️</div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-sm">ANA Airways Flight 802</h4>
-                        <p className="text-xs text-muted-foreground mt-1">Direct • 11h 20m</p>
+                        <h4 className="font-medium text-sm">Uganda Airlines Flight UR402</h4>
+                        <p className="text-xs text-muted-foreground mt-1">Arrival at Entebbe International (EBB) • 14:00 EAT</p>
                       </div>
-                      <div className="text-primary text-sm font-medium">Booked</div>
+                      <div className="text-primary text-sm font-medium">Reserved</div>
                     </div>
                     <div className="flex items-center gap-4 p-4 rounded-lg bg-background/50 border border-border/50">
                       <div className="h-10 w-10 rounded bg-primary/20 flex items-center justify-center text-xl">🏨</div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-sm">Aman Tokyo Hotel</h4>
-                        <p className="text-xs text-muted-foreground mt-1">5 Nights • Breakfast Included</p>
+                        <h4 className="font-medium text-sm">Chobe Safari Lodge</h4>
+                        <p className="text-xs text-muted-foreground mt-1">3 Nights • River View Safari Tent • All Meals Included</p>
                       </div>
-                      <div className="text-primary text-sm font-medium">Booked</div>
+                      <div className="text-primary text-sm font-medium">Reserved</div>
+                    </div>
+                    <div className="flex items-center gap-4 p-4 rounded-lg bg-background/50 border border-border/50">
+                      <div className="h-10 w-10 rounded bg-primary/20 flex items-center justify-center text-xl">🚙</div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-sm">Murchison Falls Game Drive</h4>
+                        <p className="text-xs text-muted-foreground mt-1">Guided 4x4 Tour • Includes Park Entrance Fees</p>
+                      </div>
+                      <div className="text-primary text-sm font-medium">Reserved</div>
                     </div>
                   </div>
 
-                  <button 
-                    onClick={() => {
-                      setPrompt("");
-                      setStatus("idle");
-                      setStep(0);
-                    }}
-                    className="mt-8 w-full rounded-lg border border-primary/50 text-primary py-3 font-medium transition-all hover:bg-primary/10"
-                  >
-                    Generate another flow
-                  </button>
+                  {paymentStatus === "pending" && (
+                    <button 
+                      onClick={() => setPaymentStatus("confirming")}
+                      className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-primary text-primary-foreground py-4 font-bold transition-all hover:opacity-90 glow-primary"
+                    >
+                      <CreditCard className="h-5 w-5" />
+                      Pay 1,450 cUSD with MiniPay
+                    </button>
+                  )}
+
+                  {paymentStatus === "confirming" && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="rounded-lg border border-primary bg-background/80 p-6 text-center shadow-lg backdrop-blur-md"
+                    >
+                      <h4 className="text-lg font-bold mb-2">Approve Transaction?</h4>
+                      <p className="text-sm text-muted-foreground mb-6">You are about to securely transfer 1,450 cUSD using MiniPay. This will automatically execute the smart contracts to finalize your bookings.</p>
+                      <div className="flex gap-4 justify-center">
+                        <button 
+                          onClick={() => setPaymentStatus("pending")}
+                          className="px-6 py-2 rounded-md border border-border hover:bg-secondary transition-colors text-sm font-medium"
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          onClick={() => setPaymentStatus("paid")}
+                          className="px-6 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white transition-colors text-sm font-bold flex items-center gap-2"
+                        >
+                          <ShieldCheck className="h-4 w-4" />
+                          Agree & Pay
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {paymentStatus === "paid" && (
+                    <motion.div 
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="rounded-lg bg-green-500/10 border border-green-500/20 p-6 text-center"
+                    >
+                      <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-3" />
+                      <h4 className="text-xl font-bold text-green-500 mb-1">Payment Successful!</h4>
+                      <p className="text-sm text-muted-foreground">Smart contracts executed. Your Flow is securely booked and recorded on-chain.</p>
+                    </motion.div>
+                  )}
+
+                  {paymentStatus !== "confirming" && (
+                    <button 
+                      onClick={() => {
+                        setPrompt("");
+                        setStatus("idle");
+                        setStep(0);
+                        setPaymentStatus("pending");
+                      }}
+                      className="mt-6 w-full rounded-lg border border-border text-muted-foreground hover:text-foreground py-3 font-medium transition-all hover:bg-secondary/50"
+                    >
+                      Reset & Plan another trip
+                    </button>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
