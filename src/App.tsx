@@ -5,6 +5,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import DashboardLayout from "./components/DashboardLayout.tsx";
+import Plan from "./pages/Plan.tsx";
+import Trips from "./pages/Trips.tsx";
+import Wallet from "./pages/Wallet.tsx";
 
 const queryClient = new QueryClient();
 
@@ -16,6 +20,11 @@ const App = () => (
       <BrowserRouter basename="/ExFlo/">
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route element={<DashboardLayout />}>
+            <Route path="/plan" element={<Plan />} />
+            <Route path="/trips" element={<Trips />} />
+            <Route path="/wallet" element={<Wallet />} />
+          </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
