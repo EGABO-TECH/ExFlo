@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, ShieldCheck, CreditCard, CheckCircle2, Loader2, Sparkles, MapPin } from "lucide-react";
+import { SendHorizontal, Bot, User, ShieldCheck, CreditCard, CheckCircle2, Sparkles, MapPin, Plane } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Message = {
@@ -93,49 +93,52 @@ export default function Plan() {
   ];
 
   return (
-    <div className="h-full flex flex-col bg-background/50 relative overflow-hidden">
+    <div className="h-full flex flex-col bg-[#0A0A0B] relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-1/4 -right-20 w-80 h-80 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
-      <header className="h-16 flex items-center border-b border-border/50 px-6 bg-card/30 backdrop-blur-sm sticky top-0 z-20 shrink-0">
+      <header className="h-16 flex items-center border-b border-border/10 px-6 bg-[#0A0A0B]/80 backdrop-blur-md sticky top-0 z-30 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
             <Bot className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h1 className="font-display font-bold text-foreground leading-tight">AI Pilot</h1>
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse-glow" />
-              Online — Ready to plan
+            <p className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Agentic Node Online
             </p>
           </div>
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-40">
-        <div className="max-w-3xl mx-auto flex flex-col gap-6">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-8 pb-48">
+        <div className="max-w-3xl mx-auto flex flex-col gap-8">
           <AnimatePresence initial={false}>
             {messages.map((msg, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`flex gap-4 ${msg.role === "assistant" ? "flex-row" : "flex-row-reverse"}`}
+                className={`flex gap-5 ${msg.role === "assistant" ? "flex-row" : "flex-row-reverse"}`}
               >
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
-                  msg.role === "assistant" ? "bg-primary/20 text-primary border border-primary/20" : "bg-secondary text-secondary-foreground border border-border"
+                <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
+                  msg.role === "assistant" ? "bg-primary/10 text-primary border border-primary/20" : "bg-card text-muted-foreground border border-border/50"
                 }`}>
-                  {msg.role === "assistant" ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
+                  {msg.role === "assistant" ? <Bot className="h-5 w-5" /> : <User className="h-5 w-5" />}
                 </div>
-                <div className={`rounded-2xl px-5 py-3.5 max-w-[85%] text-sm leading-relaxed ${
+                <div className={`rounded-2xl px-6 py-4 max-w-[85%] text-[15px] leading-relaxed shadow-sm ${
                   msg.role === "assistant" 
-                    ? "bg-secondary/50 text-secondary-foreground rounded-tl-none border border-border/50 backdrop-blur-sm" 
-                    : "bg-primary text-primary-foreground rounded-tr-none shadow-lg shadow-primary/10"
+                    ? "bg-card/50 text-foreground border border-border/40 backdrop-blur-sm" 
+                    : "bg-primary text-primary-foreground shadow-lg shadow-primary/5"
                 }`}>
                   {msg.content}
                   {msg.type === 'success' && (
-                      <div className="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-mono">
+                      <div className="mt-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
+                          <div className="flex items-center gap-2 mb-1 opacity-70">
+                              <ShieldCheck className="h-3 w-3" /> ON-CHAIN VERIFIED
+                          </div>
                           TX: {msg.txId}
                       </div>
                   )}
@@ -145,23 +148,23 @@ export default function Plan() {
 
             {isTyping && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="flex gap-4 flex-row"
+                className="flex gap-5 flex-row"
               >
-                <div className="h-8 w-8 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0 border border-primary/20">
-                  <Bot className="h-4 w-4" />
+                <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                  <Bot className="h-5 w-5" />
                 </div>
-                <div className="rounded-2xl px-5 py-3.5 bg-secondary/50 text-secondary-foreground rounded-tl-none border border-border/50 flex flex-col gap-1 items-start">
+                <div className="rounded-2xl px-6 py-4 bg-card/30 text-muted-foreground border border-border/40 backdrop-blur-sm flex flex-col gap-1.5 items-start min-w-[140px]">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-3 w-3 text-primary animate-pulse" />
-                    <span className="text-xs font-semibold text-primary/70">Pilot is Orchestrating...</span>
+                    <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary/80">Pilot Orchestrating</span>
                   </div>
-                  <div className="flex gap-1.5 mt-2">
-                     <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                     <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                     <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <div className="flex gap-2.5 mt-2">
+                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" />
                   </div>
                 </div>
               </motion.div>
@@ -169,53 +172,60 @@ export default function Plan() {
 
             {showCheckout && (
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="max-w-[400px] ml-12 rounded-2xl border border-primary/30 bg-card/80 backdrop-blur-xl p-6 shadow-2xl overflow-hidden relative"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-[420px] ml-14 rounded-3xl border border-primary/20 bg-card/80 backdrop-blur-2xl p-8 shadow-2xl overflow-hidden relative"
                 >
-                    <div className="absolute top-0 right-0 p-4 opacity-5">
-                       <CreditCard className="h-20 w-20" />
+                    <div className="absolute top-0 right-0 p-6 opacity-[0.03]">
+                       <Plane className="h-24 w-24 -rotate-45" />
                     </div>
 
-                    <h4 className="font-display font-bold text-lg mb-4 text-foreground">Checkout via MiniPay</h4>
-                    
-                    <div className="space-y-3 mb-6">
-                        <div className="flex justify-between text-sm py-2 border-b border-border/50">
-                            <span className="text-muted-foreground flex items-center gap-2"><MapPin className="h-3 w-3" /> Uganda Safari</span>
-                            <span className="font-semibold">1,450 cUSD</span>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                            <CreditCard className="h-5 w-5 text-primary" />
                         </div>
-                        <p className="text-[11px] text-muted-foreground leading-relaxed italic">
-                            Smart contracts will be deployed to Entebbe International & Chobe Safari Lodge endpoints.
+                        <h4 className="font-display font-bold text-xl text-foreground">MiniPay Checkout</h4>
+                    </div>
+                    
+                    <div className="space-y-4 mb-8">
+                        <div className="flex justify-between items-center py-3 border-b border-border/30">
+                            <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
+                                <MapPin className="h-4 w-4 text-primary/70" /> Uganda Safari Package
+                            </div>
+                            <span className="font-bold text-foreground">1,450 cUSD</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            Secured via Celo Blockchain. Includes flights (EBB), stays (Chobe Lodge), and agentic coordination.
                         </p>
                     </div>
 
                     {paymentStatus === "pending" && (
                         <button 
                             onClick={handleCheckout}
-                            className="w-full bg-gradient-primary text-primary-foreground py-3 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-95"
+                            className="w-full bg-gradient-primary text-primary-foreground py-4 rounded-2xl font-bold text-sm shadow-xl shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98]"
                         >
-                            Pay 1,450 cUSD
+                            Authorize Payment (1,450 cUSD)
                         </button>
                     )}
 
                     {paymentStatus === "confirming" && (
                         <div className="space-y-4">
-                            <div className="text-center p-3 rounded-lg bg-primary/10 border border-primary/20">
-                                <p className="text-xs font-semibold text-primary mb-1">Confirm Transaction?</p>
-                                <p className="text-[10px] text-muted-foreground">Approve payment out of your MiniPay Wallet.</p>
+                            <div className="text-center p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                                <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Final Review</p>
+                                <p className="text-sm text-foreground">Approve transfer from your MiniPay wallet?</p>
                             </div>
                             <div className="flex gap-3">
-                                <button onClick={() => setPaymentStatus("pending")} className="flex-1 py-2 rounded-lg border border-border text-xs font-medium hover:bg-secondary">Cancel</button>
-                                <button onClick={handleFinalPayment} className="flex-1 py-2 rounded-lg bg-green-500 text-white text-xs font-bold hover:bg-green-600 flex items-center justify-center gap-1">
-                                    <ShieldCheck className="h-3 w-3" /> Agree & Pay
+                                <button onClick={() => setPaymentStatus("pending")} className="flex-1 py-3 rounded-xl border border-border text-xs font-bold hover:bg-secondary/50">Cancel</button>
+                                <button onClick={handleFinalPayment} className="flex-1 py-3 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition-all">
+                                    <ShieldCheck className="h-4 w-4" /> Agree & Pay
                                 </button>
                             </div>
                         </div>
                     )}
 
                     {paymentStatus === "paid" && (
-                        <div className="text-center py-2 text-emerald-500 font-bold flex items-center justify-center gap-2 text-sm">
-                            <CheckCircle2 className="h-4 w-4" /> Transaction Authorized
+                        <div className="text-center py-2 text-emerald-400 font-bold flex items-center justify-center gap-2 text-sm bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                            <CheckCircle2 className="h-4 w-4" /> Transaction Complete
                         </div>
                     )}
                 </motion.div>
@@ -225,40 +235,55 @@ export default function Plan() {
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/95 to-transparent pt-10 pb-6 px-4 sm:px-6">
-        <div className="max-w-3xl mx-auto">
+      {/* Input Container - Redesigned for Ergonomics */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 pointer-events-none">
+        <div className="max-w-3xl mx-auto pointer-events-auto">
           {messages.length === 1 && !isTyping && (
-              <div className="flex flex-wrap gap-2 mb-4 justify-center">
+              <div className="flex flex-wrap gap-2.5 mb-6 justify-center">
                   {suggestions.map(s => (
                       <button 
                         key={s} 
                         onClick={() => { setInput(s); }}
-                        className="px-3 py-1.5 rounded-full border border-border bg-card/30 text-[11px] text-muted-foreground hover:border-primary/50 hover:text-primary transition-all backdrop-blur-sm"
+                        className="px-4 py-2 rounded-2xl border border-border/30 bg-card/50 text-[11px] font-semibold text-muted-foreground hover:border-primary/40 hover:text-primary transition-all backdrop-blur-xl shadow-sm"
                       >
                           {s}
                       </button>
                   ))}
               </div>
           )}
-          <form onSubmit={handleSubmit} className="relative flex items-center group">
-            <input
-              autoFocus
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={isTyping || showCheckout}
-              placeholder="Tell me where you want to go..."
-              className="w-full rounded-2xl border border-border bg-card/80 backdrop-blur-xl px-6 py-4.5 pr-14 text-sm outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/50 shadow-2xl placeholder:text-muted-foreground/70 disabled:opacity-50 border-primary/10 group-focus-within:border-primary/30"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || isTyping || showCheckout}
-              className="absolute right-2 top-2 bottom-2 aspect-square flex items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground disabled:opacity-50 hover:opacity-90 transition-opacity"
-            >
-              <Send className="h-4 w-4 mr-0.5" />
-            </button>
-          </form>
-          <p className="text-[10px] text-center text-muted-foreground/40 mt-3 uppercase tracking-widest font-medium">
-             Agentic AI Tourism Protocol v1.0 • Built for EGABO-TECH
+          
+          <div className="relative group">
+            {/* Glossy Wrapper */}
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-[30px] opacity-0 group-focus-within:opacity-100 blur transition duration-500" />
+            
+            <form onSubmit={handleSubmit} className="relative flex items-end gap-3 bg-card border border-border/60 rounded-[28px] p-2 pl-6 pr-2 shadow-2xl backdrop-blur-3xl overflow-hidden min-h-[64px]">
+              <textarea
+                autoFocus
+                rows={1}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit(e as any);
+                    }
+                }}
+                disabled={isTyping || showCheckout}
+                placeholder="Tell the AI Pilot your travel dreams..."
+                className="flex-1 bg-transparent border-none outline-none py-3.5 text-[15px] resize-none max-h-32 text-foreground placeholder:text-muted-foreground/60 leading-relaxed scrollbar-hide"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || isTyping || showCheckout}
+                className="h-12 w-12 flex items-center justify-center rounded-2xl bg-gradient-primary text-primary-foreground disabled:opacity-30 hover:opacity-90 transition-all glow-primary active:scale-90 shrink-0"
+              >
+                <Plane className="h-5 w-5 -rotate-45 relative right-[1px] bottom-[1px]" />
+              </button>
+            </form>
+          </div>
+
+          <p className="text-[9px] text-center text-muted-foreground/30 mt-5 uppercase tracking-[0.3em] font-bold">
+             Agentic Protocol • Synchronized with EGABO-TECH Nodes
           </p>
         </div>
       </div>
