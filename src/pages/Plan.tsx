@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-// Deployment Cache Bust: 2026-03-25T01:52:00Z
+// Deployment Cache Bust: 2026-03-25T01:58:00Z
 import { SendHorizontal, Bot, User, ShieldCheck, CreditCard, CheckCircle2, Sparkles, MapPin, Plane } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -9,6 +9,76 @@ type Message = {
   type?: "text" | "checkout" | "success";
   amount?: string;
   txId?: string;
+  isStreaming?: boolean;
+};
+
+// Custom Typewriter Hook
+const useTypewriter = (text: string, speed: number = 20, active: boolean = false) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const [isDone, setIsDone] = useState(false);
+
+  useEffect(() => {
+    if (!active) {
+      setDisplayedText(text);
+      setIsDone(true);
+      return;
+    }
+
+    setDisplayedText("");
+    setIsDone(false);
+    let i = 0;
+    const timer = setInterval(() => {
+      setDisplayedText((prev) => prev + text.charAt(i));
+      i++;
+      if (i >= text.length) {
+        clearInterval(timer);
+        setIsDone(true);
+      }
+    }, speed);
+
+    return () => clearInterval(timer);
+  }, [text, speed, active]);
+
+  return { displayedText, isDone };
+};
+
+const ChatBubble = ({ msg, isLast }: { msg: Message, isLast: boolean }) => {
+  const { displayedText, isDone } = useTypewriter(msg.content, 15, msg.role === "assistant" && !!msg.isStreaming);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      className={`flex gap-5 ${msg.role === "assistant" ? "flex-row" : "flex-row-reverse"}`}
+    >
+      <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
+        msg.role === "assistant" ? "bg-primary/10 text-primary border border-primary/20" : "bg-card text-muted-foreground border border-border/50"
+      }`}>
+        {msg.role === "assistant" ? <Bot className="h-5 w-5" /> : <User className="h-5 w-5" />}
+      </div>
+      <div className={`rounded-2xl px-6 py-4 max-w-[85%] text-[15px] leading-relaxed shadow-sm transition-all duration-300 ${
+        msg.role === "assistant" 
+          ? "bg-card/50 text-foreground border border-border/40 backdrop-blur-sm hover:border-primary/30 hover:bg-card/60" 
+          : "bg-primary text-primary-foreground shadow-lg shadow-primary/5 hover:opacity-95"
+      }`}>
+        {msg.role === "assistant" ? displayedText : msg.content}
+        {msg.role === "assistant" && !isDone && <span className="inline-block w-1.5 h-4 bg-primary/40 ml-1 animate-pulse align-middle" />}
+        
+        {msg.type === 'success' && isDone && (
+            <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }}
+                className="mt-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-emerald-400 text-xs font-mono"
+            >
+                <div className="flex items-center gap-2 mb-1 opacity-70">
+                    <ShieldCheck className="h-3 w-3" /> ON-CHAIN VERIFIED
+                </div>
+                TX: {msg.txId}
+            </motion.div>
+        )}
+      </div>
+    </motion.div>
+  );
 };
 
 export default function Plan() {
@@ -35,10 +105,11 @@ export default function Plan() {
   const handleFinalPayment = () => {
     setPaymentStatus("paid");
     setTimeout(() => {
-        setMessages(prev => [...prev, {
+        setMessages(prev => [...prev.map(m => ({...m, isStreaming: false})), {
             role: "assistant",
             content: "Payment successful! Your Uganda Safari Experience has been securely booked on-chain via MiniPay. You can view your itinerary in 'My Trips'.",
             type: "success",
+            isStreaming: true,
             txId: "0x" + Math.random().toString(16).slice(2, 10).toUpperCase()
         }]);
         setShowCheckout(false);
@@ -51,7 +122,7 @@ export default function Plan() {
 
     const userMsg = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
+    setMessages((prev) => [...prev.map(m => ({...m, isStreaming: false})), { role: "user", content: userMsg }]);
     setIsTyping(true);
 
     const isUganda = userMsg.toLowerCase().includes("uganda") || userMsg.toLowerCase().includes("safari") || userMsg.toLowerCase().includes("entebbe");
@@ -64,7 +135,7 @@ export default function Plan() {
         ? "Excellent! I'm initializing the Uganda Tourism Protocol. Scanning flights from Entebbe International (EBB) and checking availability at Kampala Serena Hotel..."
         : "I'm orchestrating your Flow. Scanning global flight databases and premium accommodation providers for your journey...";
       
-      setMessages((prev) => [...prev, { role: "assistant", content: response1 }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: response1, isStreaming: true }]);
       
       setIsTyping(true);
       setTimeout(() => {
@@ -74,14 +145,14 @@ export default function Plan() {
           ? "I've locked in an exquisite 5-day itinerary: Flight UR402, 3 nights at Chobe Safari Lodge, and a private game drive in Murchison Falls. Everything is ready for checkout."
           : "I've optimized your itinerary for zero friction. Routes and stays are reserved. Would you like to proceed to secure this Flow via MiniPay?";
         
-        setMessages((prev) => [...prev, { role: "assistant", content: response2 }]);
+        setMessages((prev) => [...prev.map((m, idx) => idx === prev.length -1 ? {...m, isStreaming: false} : m), { role: "assistant", content: response2, isStreaming: true }]);
 
         if (isUganda) {
             setTimeout(() => {
                 setShowCheckout(true);
-            }, 800);
+            }, 3000); // Wait for typing to finish roughly
         }
-      }, 2500);
+      }, 3500);
 
     }, 1200);
   };
@@ -94,7 +165,7 @@ export default function Plan() {
   ];
 
   return (
-    <div className="h-full flex flex-col bg-[#0A0A0B] relative overflow-hidden">
+    <div className="h-full flex flex-col bg-[#0A0A0B] relative overflow-hidden font-sans">
       {/* Background Decor */}
       <div className="absolute top-1/4 -right-20 w-80 h-80 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
@@ -118,33 +189,7 @@ export default function Plan() {
         <div className="max-w-3xl mx-auto flex flex-col gap-8">
           <AnimatePresence initial={false}>
             {messages.map((msg, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`flex gap-5 ${msg.role === "assistant" ? "flex-row" : "flex-row-reverse"}`}
-              >
-                <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
-                  msg.role === "assistant" ? "bg-primary/10 text-primary border border-primary/20" : "bg-card text-muted-foreground border border-border/50"
-                }`}>
-                  {msg.role === "assistant" ? <Bot className="h-5 w-5" /> : <User className="h-5 w-5" />}
-                </div>
-                <div className={`rounded-2xl px-6 py-4 max-w-[85%] text-[15px] leading-relaxed shadow-sm transition-all duration-300 hover:shadow-md ${
-                  msg.role === "assistant" 
-                    ? "bg-card/50 text-foreground border border-border/40 backdrop-blur-sm hover:border-primary/30 hover:bg-card/60" 
-                    : "bg-primary text-primary-foreground shadow-lg shadow-primary/5 hover:opacity-95"
-                }`}>
-                  {msg.content}
-                  {msg.type === 'success' && (
-                      <div className="mt-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
-                          <div className="flex items-center gap-2 mb-1 opacity-70">
-                              <ShieldCheck className="h-3 w-3" /> ON-CHAIN VERIFIED
-                          </div>
-                          TX: {msg.txId}
-                      </div>
-                  )}
-                </div>
-              </motion.div>
+              <ChatBubble key={i} msg={msg} isLast={i === messages.length - 1} />
             ))}
 
             {isTyping && (
