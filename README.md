@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://lovable.dev/opengraph-image-p98pqg.png" alt="ExFlo Logo" width="300" />
+  <img src="./public/logo.png" alt="ExFlo Logo" width="300" />
 
   <h1>🌍 ExFlo: The Agentic AI Ecosystem</h1>
   
