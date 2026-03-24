@@ -4,7 +4,15 @@ import { motion } from "framer-motion";
 export default function Wallet() {
   const transactions = [
     {
-      title: "Murchison Falls Safari",
+      title: "Murchison Falls (Reserve)",
+      date: "Mar 25, 2026",
+      amount: "1,450 cUSD",
+      type: "out",
+      status: "Pending Settlement",
+      block: "Pending"
+    },
+    {
+      title: "Uganda Safari (Active)",
       date: "Mar 25, 2026",
       amount: "1,450 cUSD",
       type: "out",
@@ -169,10 +177,10 @@ export default function Wallet() {
               <div className="flex items-center justify-between md:justify-end gap-12 border-t md:border-t-0 border-border/20 pt-4 md:pt-0">
                 <div className="text-right">
                     <div className="flex items-center gap-2 justify-end mb-1">
-                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">{tx.status}</span>
+                        <div className={`h-1.5 w-1.5 rounded-full ${tx.status === 'Pending Settlement' ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+                        <span className={`text-[9px] font-bold uppercase tracking-widest ${tx.status === 'Pending Settlement' ? 'text-amber-500' : 'text-emerald-500'}`}>{tx.status}</span>
                     </div>
-                    <p className={`text-2xl font-display font-bold ${tx.type === 'in' ? 'text-emerald-500' : 'text-foreground'}`}>
+                    <p className={`text-2xl font-display font-bold ${tx.type === 'in' ? 'text-emerald-500' : tx.status === 'Pending Settlement' ? 'text-foreground/60' : 'text-foreground'}`}>
                         {tx.amount}
                     </p>
                 </div>

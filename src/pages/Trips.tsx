@@ -123,10 +123,12 @@ export default function Trips() {
                             ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                             : trip.status === "upcoming"
                             ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                            : trip.status === "pending_payment"
+                            ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
                             : "bg-secondary/50 text-muted-foreground border-border/50"
                         }`}
                         >
-                        {trip.status}
+                        {trip.status === "pending_payment" ? "Pending Payment" : trip.status}
                         </span>
                     </div>
                     <div className="flex flex-wrap gap-6 mt-4 text-sm text-muted-foreground font-medium">
