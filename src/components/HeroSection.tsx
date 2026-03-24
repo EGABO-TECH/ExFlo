@@ -40,7 +40,12 @@ const HeroSection = () => {
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <button className="rounded-lg bg-gradient-primary px-8 py-3.5 text-base font-semibold text-primary-foreground transition-all hover:opacity-90 glow-primary">
+            <button 
+              onClick={() => {
+                document.getElementById('demo-section')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="rounded-lg bg-gradient-primary px-8 py-3.5 text-base font-semibold text-primary-foreground transition-all hover:opacity-90 glow-primary"
+            >
               Start Your Flow
             </button>
             <button className="rounded-lg border border-border bg-secondary/50 px-8 py-3.5 text-base font-semibold text-foreground transition-all hover:bg-secondary">

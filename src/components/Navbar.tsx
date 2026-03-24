@@ -9,9 +9,9 @@ const Navbar = () => {
       className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 backdrop-blur-xl bg-background/70"
     >
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-primary" />
-          <span className="font-display text-xl font-bold tracking-tight">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="ExFlo Logo" className="h-10 w-auto" />
+          <span className="font-display text-2xl font-bold tracking-tight">
             Ex<span className="text-gradient-primary">Flo</span>
           </span>
         </div>
