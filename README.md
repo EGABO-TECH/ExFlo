@@ -89,5 +89,5 @@ Before you begin, ensure you have the following installed and set up:
   </table>
   
   <br/>
-  <i>Engineered with passion by EGABO-TECH</i>
+  <i>Engineered with passion by THE RULE OF 6</i>
 </div>
