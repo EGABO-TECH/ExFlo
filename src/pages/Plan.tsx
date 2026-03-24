@@ -129,10 +129,10 @@ export default function Plan() {
                 }`}>
                   {msg.role === "assistant" ? <Bot className="h-5 w-5" /> : <User className="h-5 w-5" />}
                 </div>
-                <div className={`rounded-2xl px-6 py-4 max-w-[85%] text-[15px] leading-relaxed shadow-sm ${
+                <div className={`rounded-2xl px-6 py-4 max-w-[85%] text-[15px] leading-relaxed shadow-sm transition-all duration-300 hover:shadow-md ${
                   msg.role === "assistant" 
-                    ? "bg-card/50 text-foreground border border-border/40 backdrop-blur-sm" 
-                    : "bg-primary text-primary-foreground shadow-lg shadow-primary/5"
+                    ? "bg-card/50 text-foreground border border-border/40 backdrop-blur-sm hover:border-primary/30 hover:bg-card/60" 
+                    : "bg-primary text-primary-foreground shadow-lg shadow-primary/5 hover:opacity-95"
                 }`}>
                   {msg.content}
                   {msg.type === 'success' && (
