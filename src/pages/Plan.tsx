@@ -10,11 +10,12 @@ export default function Plan() {
     },
   ]);
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isTyping]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,28 +24,51 @@ export default function Plan() {
     const userMsg = input.trim();
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
+    setIsTyping(true);
 
-    // Simulate Agent Thinking
+    const isUganda = userMsg.toLowerCase().includes("uganda") || userMsg.toLowerCase().includes("safari");
+
+    // Dynamic Agent Thinking Responses
     setTimeout(() => {
+      setIsTyping(false);
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "I'm orchestrating your Flow. Scanning flights from Entebbe International Airport to your destination...",
+          content: isUganda 
+            ? "Splendid choice! Uganda is beautiful. I'm orchestrating your Flow. Scanning flights from Entebbe International Airport to find the perfect itinerary..."
+            : "I'm orchestrating your Flow. Scanning thousands of global flights to find the optimal route for your destination...",
         },
       ]);
       
+      setIsTyping(true);
       setTimeout(() => {
+        setIsTyping(false);
         setMessages((prev) => [
           ...prev,
           {
             role: "assistant",
-            content: "I've drafted a smart contract for this journey. You can review the details on your My Trips dashboard or head to Wallet to settle the cUSD payment.",
+            content: "Everything is aligned. I've drafted an instant smart contract for this journey.",
           },
         ]);
-      }, 2500);
+        
+        setIsTyping(true);
+        setTimeout(() => {
+          setIsTyping(false);
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content: isUganda
+                ? "Your booking at Kampala Serena Hotel and Chobe Safari Lodge is pending. You can review the details on your 'My Trips' dashboard or head to your 'Wallet' to settle the **1,450 cUSD** payment via MiniPay!"
+                : "The trip is securely reserved. Please review the details on your 'My Trips' dashboard or visit your 'Wallet' to finalize the crypto payment via MiniPay when you're ready.",
+            },
+          ]);
+        }, 1200);
 
-    }, 1000);
+      }, 2000);
+
+    }, 800);
   };
 
   return (
@@ -88,6 +112,26 @@ export default function Plan() {
                 </div>
               </motion.div>
             ))}
+            {isTyping && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="flex gap-4 flex-row"
+              >
+                <div className="h-8 w-8 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
+                  <Bot className="h-4 w-4" />
+                </div>
+                <div className="rounded-2xl px-5 py-3.5 bg-secondary/50 text-secondary-foreground rounded-tl-none border border-border/50 flex flex-col gap-1 items-start">
+                  <span className="text-xs font-semibold text-primary/70 animate-pulse">Pilot is Orchestrating...</span>
+                  <div className="flex gap-1.5 mt-1">
+                     <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                     <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                     <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
           <div ref={endRef} />
         </div>
@@ -100,12 +144,13 @@ export default function Plan() {
               autoFocus
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              disabled={isTyping}
               placeholder="Tell me where you want to go..."
-              className="w-full rounded-2xl border border-border bg-card/50 backdrop-blur-md px-6 py-4 pr-14 text-sm outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/50 shadow-lg placeholder:text-muted-foreground/70"
+              className="w-full rounded-2xl border border-border bg-card/50 backdrop-blur-md px-6 py-4 pr-14 text-sm outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/50 shadow-lg placeholder:text-muted-foreground/70 disabled:opacity-50"
             />
             <button
               type="submit"
-              disabled={!input.trim()}
+              disabled={!input.trim() || isTyping}
               className="absolute right-2 top-2 bottom-2 aspect-square flex items-center justify-center rounded-xl bg-primary text-primary-foreground disabled:opacity-50 hover:opacity-90 transition-opacity"
             >
               <Send className="h-4 w-4 mr-0.5" />

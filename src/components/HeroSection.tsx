@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Background image */}
@@ -41,15 +43,16 @@ const HeroSection = () => {
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <button 
-              onClick={() => {
-                document.getElementById('demo-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onClick={() => navigate('/plan')}
               className="rounded-lg bg-gradient-primary px-8 py-3.5 text-base font-semibold text-primary-foreground transition-all hover:opacity-90 glow-primary"
             >
-              Start Your Flow
+              Start Your Flow & Plan a Trip
             </button>
-            <button className="rounded-lg border border-border bg-secondary/50 px-8 py-3.5 text-base font-semibold text-foreground transition-all hover:bg-secondary">
-              View Documentation
+            <button 
+              onClick={() => navigate('/trips')}
+              className="rounded-lg border border-border bg-secondary/50 px-8 py-3.5 text-base font-semibold text-foreground transition-all hover:bg-secondary"
+            >
+              View Demo Trips
             </button>
           </div>
         </motion.div>
