@@ -7,6 +7,8 @@ import { CheckoutModal } from "../components/CheckoutModal";
 import { FlowConfirmation } from "../components/FlowConfirmation";
 import { useNavigate } from "react-router-dom";
 
+// Force Sync: 2026-03-25T08:44:00Z (Dynamic Destinations)
+
 type Message = {
   role: "assistant" | "user";
   content: string;
