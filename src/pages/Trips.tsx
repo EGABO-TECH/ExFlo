@@ -1,4 +1,5 @@
-import { MapPin, Calendar, CreditCard, Activity, Leaf, Zap, Globe, Clock, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { MapPin, Calendar, CreditCard, Activity, Leaf, Zap, Globe, Clock, Sparkles, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 // Deployment Force Sync: 2026-03-25T02:50:00Z (Delayed Payment Workflow)
 
@@ -156,9 +157,16 @@ export default function Trips() {
                     <p className="text-3xl font-display font-bold text-foreground leading-none">{trip.cost}</p>
                     </div>
                     {trip.status === 'pending_payment' ? (
-                        <button className="h-14 px-8 rounded-2xl bg-primary text-primary-foreground border border-primary text-xs font-bold hover:opacity-90 shadow-lg glow-primary transition-all active:scale-95 flex items-center gap-2">
+                        <button 
+                            onClick={() => handleFinalizePayment(trip.id)}
+                            className="h-14 px-8 rounded-2xl bg-cyan-400 text-slate-900 border border-cyan-400 text-xs font-black uppercase tracking-wider hover:bg-cyan-300 shadow-lg shadow-cyan-500/20 transition-all active:scale-95 flex items-center gap-2"
+                        >
                             <CreditCard className="h-4 w-4" /> Finalize Payment
                         </button>
+                    ) : trip.id === "RES-UG991" ? (
+                        <div className="text-emerald-500 font-bold text-xs flex items-center gap-2 bg-emerald-500/10 px-6 py-4 rounded-2xl border border-emerald-500/20">
+                            <CheckCircle2 className="h-4 w-4" /> Payment Successful
+                        </div>
                     ) : (
                         <button className="h-14 px-8 rounded-2xl bg-secondary/50 border border-border/50 text-xs font-bold hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all group-hover:shadow-[0_0_20px_rgba(14,165,233,0.15)] active:scale-95">
                             Action Center

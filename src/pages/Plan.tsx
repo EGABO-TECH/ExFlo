@@ -136,15 +136,31 @@ export default function Plan() {
     setMessages((prev) => [...prev.map(m => ({ ...m, isStreaming: false })), { role: "user", content: userMsg }]);
     setIsTyping(true);
 
-    const isUganda = userMsg.toLowerCase().includes("uganda") || userMsg.toLowerCase().includes("safari") || userMsg.toLowerCase().includes("entebbe");
+    const lowerInput = userMsg.toLowerCase();
+    const isUganda = lowerInput.includes("uganda") || lowerInput.includes("safari") || lowerInput.includes("entebbe") || lowerInput.includes("murchison");
+    
+    // Simple destination extraction
+    let destination = "Your Destination";
+    const commonDestinations = ["tokyo", "paris", "bali", "barcelona", "london", "dubai", "new york", "murchison falls", "uganda"];
+    for (const d of commonDestinations) {
+      if (lowerInput.includes(d)) {
+        destination = d.charAt(0) * 1.toUpperCase() + d.slice(1);
+        break;
+      }
+    }
+    if (destination === "Your Destination") {
+        // Fallback: take the last word if it looks like a place
+        const words = userMsg.split(" ");
+        if (words.length > 0) destination = words[words.length - 1].replace(/[?!.]/g, "");
+    }
 
     // Ultimate Multi-Agent Orchestration Logic
     setTimeout(() => {
       setIsTyping(false);
       
       const response1 = isUganda 
-        ? "SkyFlow Agent initializing Uganda Protocol. Scanning Entebbe International (EBB) flight corridor and StayBot verifying Serena Hotel suites..."
-        : "Agentic Cluster initializing. Global orchestration layer scanning multi-modal logistics for your Flow...";
+        ? `SkyFlow Agent initializing Uganda Protocol. Scanning Entebbe International (EBB) flight corridor and StayBot verifying Serena Hotel suites for ${destination}...`
+        : `Agentic Cluster initializing. Global orchestration layer scanning multi-modal logistics for ${destination}...`;
       
       setMessages((prev) => [...prev, { role: "assistant", content: response1, isStreaming: true }]);
       
@@ -152,33 +168,31 @@ export default function Plan() {
       setTimeout(() => {
         setIsTyping(false);
         
-        const itinerary = isUganda ? {
+        const itinerary = {
             items: [
-                { type: 'flight', title: 'Flight to Murchison', details: 'Direct flight — 8h 30m • Day 1, 09:00', price: 680 },
-                { type: 'hotel', title: 'Boutique Hotel', details: 'Deluxe Suite — 5 nights • Day 1 – Day 6', price: 950 },
-                { type: 'activity', title: 'City Walking Tour', details: 'Guided 3-hour historical tour • Day 2, 10:00', price: 45 },
+                { type: 'flight', title: `Flight to ${destination}`, details: 'Direct flight — 8h 30m • Day 1, 09:00', price: 680 },
+                { type: 'hotel', title: isUganda ? 'Chobe Safari Lodge' : `${destination} Grand Stay`, details: 'Premium Suite — 5 nights • Day 1 – Day 6', price: 950 },
+                { type: 'activity', title: isUganda ? 'Murchison Falls Drive' : `${destination} City Tour`, details: 'Guided 3-hour experience • Day 2, 10:00', price: 45 },
                 { type: 'activity', title: 'Local Cuisine Experience', details: 'Food tasting with a local chef • Day 3, 19:00', price: 85 },
-                { type: 'flight', title: 'Return Flight', details: 'Direct flight — 9h 10m • Day 6, 18:00', price: 620 }
+                { type: 'flight', title: `Return Flight from ${destination}`, details: 'Direct flight — 9h 10m • Day 6, 18:00', price: 620 }
             ],
             total: 2380,
             onBook: () => handleBook({
                 items: [
-                    { type: 'flight', title: 'Flight to Murchison', details: 'Direct flight — 8h 30m • Day 1, 09:00', price: 680 },
-                    { type: 'hotel', title: 'Boutique Hotel', details: 'Deluxe Suite — 5 nights • Day 1 – Day 6', price: 950 },
-                    { type: 'activity', title: 'City Walking Tour', details: 'Guided 3-hour historical tour • Day 2, 10:00', price: 45 },
+                    { type: 'flight', title: `Flight to ${destination}`, details: 'Direct flight — 8h 30m • Day 1, 09:00', price: 680 },
+                    { type: 'hotel', title: isUganda ? 'Chobe Safari Lodge' : `${destination} Grand Stay`, details: 'Premium Suite — 5 nights • Day 1 – Day 6', price: 950 },
+                    { type: 'activity', title: isUganda ? 'Murchison Falls Drive' : `${destination} City Tour`, details: 'Guided 3-hour experience • Day 2, 10:00', price: 45 },
                     { type: 'activity', title: 'Local Cuisine Experience', details: 'Food tasting with a local chef • Day 3, 19:00', price: 85 },
-                    { type: 'flight', title: 'Return Flight', details: 'Direct flight — 9h 10m • Day 6, 18:00', price: 620 }
+                    { type: 'flight', title: `Return Flight from ${destination}`, details: 'Direct flight — 9h 10m • Day 6, 18:00', price: 620 }
                 ],
                 total: 2380
             })
-        } : null;
+        };
 
-        const response2 = isUganda
-          ? "Great choice! I've crafted a complete Flow for your trip. Here's your itinerary:"
-          : "Flow convergence achieved. Logistics are locked and verified across the network. Review your personalized journey Roadmap below.";
+        const response2 = `Great choice! I've crafted a complete Flow for your trip to ${destination}. Here's your itinerary:`;
         
         const roadmap = !isUganda ? [
-            { type: 'flight', title: 'Global Route', details: 'Optimized flight path found with zero-friction connections.', agent: 'SKYFLOW' },
+            { type: 'flight', title: `${destination} Route`, details: 'Optimized flight path found with zero-friction connections.', agent: 'SKYFLOW' },
             { type: 'hotel', title: 'Premium Stay', details: 'Accommodation verified via verified network providers.', agent: 'STAYBOT' },
             { type: 'done', title: 'Ready for Flow', details: 'Agentic sequence complete.', agent: 'AI PILOT' }
         ] : null;
