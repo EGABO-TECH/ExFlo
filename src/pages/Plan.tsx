@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from "react";
-// Deployment Force Sync: 2026-03-25T02:50:00Z (Professional Workflow & Grammar Audit)
-import { SendHorizontal, Bot, User, ShieldCheck, CreditCard, CheckCircle2, Sparkles, MapPin, Plane } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { JourneyRoadmap } from "../components/JourneyRoadmap";
+import { ItineraryCard } from "../components/ItineraryCard";
+import { CheckoutModal } from "../components/CheckoutModal";
+import { FlowConfirmation } from "../components/FlowConfirmation";
+import { useNavigate } from "react-router-dom";
 
 type Message = {
   role: "assistant" | "user";
@@ -12,6 +13,7 @@ type Message = {
   txId?: string;
   isStreaming?: boolean;
   roadmap?: any[];
+  itinerary?: any;
 };
 
 // Custom Typewriter Hook
@@ -77,15 +79,23 @@ const ChatBubble = ({ msg, isLast }: { msg: Message, isLast: boolean }) => {
           </motion.div>
         )}
 
-        {msg.roadmap && isDone && (
+        {msg.roadmap && isDone && !msg.itinerary && (
           <JourneyRoadmap events={msg.roadmap} />
+        )}
+
+        {msg.itinerary && isDone && (
+            <ItineraryCard 
+                items={msg.itinerary.items} 
+                total={msg.itinerary.total} 
+                onBook={() => msg.itinerary.onBook()} 
+            />
         )}
       </div>
     </motion.div>
   );
 };
 
-export default function Plan() {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -94,30 +104,20 @@ export default function Plan() {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<"pending" | "confirming" | "paid">("pending");
+  const [activeStep, setActiveStep] = useState<"chat" | "checkout" | "confirmed">("chat");
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [pendingItinerary, setPendingItinerary] = useState<any>(null);
+  
   const endRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping, showCheckout]);
-
-  const handleCheckout = () => {
-    setPaymentStatus("confirming");
+  const handleBook = (itinerary: any) => {
+    setPendingItinerary(itinerary);
+    setShowCheckoutModal(true);
   };
 
-  const handleFinalPayment = () => {
-    setPaymentStatus("paid");
-    setTimeout(() => {
-      setMessages(prev => [...prev.map(m => ({ ...m, isStreaming: false })), {
-        role: "assistant",
-        content: "Reservation confirmed! Your Uganda Safari Experience has been securely synchronized with your profile. You can now review the recommendations and finalize the settlement via MiniPay in your 'My Trips' dashboard.",
-        type: "success",
-        isStreaming: true,
-        txId: "RES-" + Math.random().toString(16).slice(2, 10).toUpperCase()
-      }]);
-      setShowCheckout(false);
-    }, 1500);
+  const handleFinalConfirm = () => {
+    setShowCheckoutModal(false);
+    setActiveStep("confirmed");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -145,31 +145,42 @@ export default function Plan() {
       setTimeout(() => {
         setIsTyping(false);
         
+        const itinerary = isUganda ? {
+            items: [
+                { type: 'flight', title: 'Flight to Murchison', details: 'Direct flight — 8h 30m • Day 1, 09:00', price: 680 },
+                { type: 'hotel', title: 'Boutique Hotel', details: 'Deluxe Suite — 5 nights • Day 1 – Day 6', price: 950 },
+                { type: 'activity', title: 'City Walking Tour', details: 'Guided 3-hour historical tour • Day 2, 10:00', price: 45 },
+                { type: 'activity', title: 'Local Cuisine Experience', details: 'Food tasting with a local chef • Day 3, 19:00', price: 85 },
+                { type: 'flight', title: 'Return Flight', details: 'Direct flight — 9h 10m • Day 6, 18:00', price: 620 }
+            ],
+            total: 2380,
+            onBook: () => handleBook({
+                items: [
+                    { type: 'flight', title: 'Flight to Murchison', details: 'Direct flight — 8h 30m • Day 1, 09:00', price: 680 },
+                    { type: 'hotel', title: 'Boutique Hotel', details: 'Deluxe Suite — 5 nights • Day 1 – Day 6', price: 950 },
+                    { type: 'activity', title: 'City Walking Tour', details: 'Guided 3-hour historical tour • Day 2, 10:00', price: 45 },
+                    { type: 'activity', title: 'Local Cuisine Experience', details: 'Food tasting with a local chef • Day 3, 19:00', price: 85 },
+                    { type: 'flight', title: 'Return Flight', details: 'Direct flight — 9h 10m • Day 6, 18:00', price: 620 }
+                ],
+                total: 2380
+            })
+        } : null;
+
         const response2 = isUganda
-          ? "Orchestration complete. I've successfully converged your journey across three specialized agents. Your interactive Flow roadmap is ready for final review."
+          ? "Great choice! I've crafted a complete Flow for your trip. Here's your itinerary:"
           : "Flow convergence achieved. Logistics are locked and verified across the network. Review your personalized journey Roadmap below.";
         
-        const roadmap = isUganda ? [
-            { type: 'flight', title: 'Flight UR402', details: 'Entebbe International Departure • Business Class Reserved', agent: 'SKYFLOW' },
-            { type: 'hotel', title: 'Chobe Safari Lodge', details: '3 Nights Luxury Suite • River View Authenticated', agent: 'STAYBOT' },
-            { type: 'activity', title: 'Murchison Falls Game Drive', details: 'Private 4x4 Orchestrated • Sunrise Departure', agent: 'LOCALGUIDE' },
-            { type: 'done', title: 'Everything Ready', details: 'All nodes synchronized and ready for blockchain booking.', agent: 'AI PILOT' }
-        ] : [
+        const roadmap = !isUganda ? [
             { type: 'flight', title: 'Global Route', details: 'Optimized flight path found with zero-friction connections.', agent: 'SKYFLOW' },
             { type: 'hotel', title: 'Premium Stay', details: 'Accommodation verified via verified network providers.', agent: 'STAYBOT' },
             { type: 'done', title: 'Ready for Flow', details: 'Agentic sequence complete.', agent: 'AI PILOT' }
-        ];
+        ] : null;
 
         setMessages((prev) => [
             ...prev.map((m, idx) => idx === prev.length - 1 ? { ...m, isStreaming: false } : m), 
-            { role: "assistant", content: response2, isStreaming: true, roadmap: roadmap as any }
+            { role: "assistant", content: response2, isStreaming: true, roadmap: roadmap as any, itinerary: itinerary as any }
         ]);
 
-        if (isUganda) {
-          setTimeout(() => {
-            setShowCheckout(true);
-          }, 4500); // Wait for roadmap animation
-        }
       }, 3500);
 
     }, 1200);
@@ -211,89 +222,42 @@ export default function Plan() {
             ))}
 
             {isTyping && (
-              <motion.div
+                <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 className="flex gap-5 flex-row"
-              >
+                >
                 <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
-                  <Bot className="h-5 w-5" />
+                    <Bot className="h-5 w-5" />
                 </div>
                 <div className="rounded-2xl px-6 py-4 bg-card/30 text-muted-foreground border border-border/40 backdrop-blur-sm flex flex-col gap-1.5 items-start min-w-[140px]">
-                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                     <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
                     <span className="text-[11px] font-bold uppercase tracking-wider text-primary/80">Pilot Orchestrating</span>
-                  </div>
-                  <div className="flex gap-2.5 mt-2">
+                    </div>
+                    <div className="flex gap-2.5 mt-2">
                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]" />
                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" />
-                  </div>
+                    </div>
                 </div>
-              </motion.div>
+                </motion.div>
             )}
 
-            {showCheckout && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="max-w-[420px] mx-auto md:ml-14 rounded-3xl border border-primary/20 bg-card/80 backdrop-blur-2xl p-8 shadow-2xl overflow-hidden relative"
-              >
-                <div className="absolute top-0 right-0 p-6 opacity-[0.03]">
-                  <Plane className="h-24 w-24 -rotate-45" />
-                </div>
-
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                    <CreditCard className="h-5 w-5 text-primary" />
-                  </div>
-                  <h4 className="font-display font-bold text-xl text-foreground">MiniPay Checkout</h4>
-                </div>
-
-                <div className="space-y-4 mb-8">
-                  <div className="flex justify-between items-center py-3 border-b border-border/30">
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
-                      <MapPin className="h-4 w-4 text-primary/70" /> Uganda Safari Package
-                    </div>
-                    <span className="font-bold text-foreground">1,450 cUSD</span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    Secured via Celo Blockchain. Includes flights (EBB), stays (Chobe Lodge), and agentic coordination.
-                  </p>
-                </div>
-
-                    {paymentStatus === "pending" && (
-                        <button 
-                            onClick={handleCheckout}
-                            className="w-full bg-gradient-primary text-primary-foreground py-4 rounded-2xl font-bold text-sm shadow-xl shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98]"
-                        >
-                            Confirm & Reserve Journey
-                        </button>
-                    )}
-
-                {paymentStatus === "confirming" && (
-                  <div className="space-y-4">
-                    <div className="text-center p-4 rounded-2xl bg-primary/5 border border-primary/10">
-                                <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Secure Reservation</p>
-                                <p className="text-sm text-foreground">Reserve this itinerary and save to your discovery dashboard?</p>
-                    </div>
-                    <div className="flex gap-3">
-                      <button onClick={() => setPaymentStatus("pending")} className="flex-1 py-3 rounded-xl border border-border text-xs font-bold hover:bg-secondary/50">Cancel</button>
-                      <button onClick={handleFinalPayment} className="flex-1 py-3 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition-all">
-                        <ShieldCheck className="h-4 w-4" /> Confirm & Save
-                      </button>
-                    </div>
-                  </div>
+            <AnimatePresence>
+                {showCheckoutModal && pendingItinerary && (
+                    <CheckoutModal 
+                        items={pendingItinerary.items} 
+                        total={pendingItinerary.total} 
+                        onConfirm={handleFinalConfirm}
+                        onClose={() => setShowCheckoutModal(false)}
+                    />
                 )}
-
-                {paymentStatus === "paid" && (
-                  <div className="text-center py-2 text-emerald-400 font-bold flex items-center justify-center gap-2 text-sm bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                    <CheckCircle2 className="h-4 w-4" /> Journey Reserved
-                  </div>
+                {activeStep === "confirmed" && (
+                    <FlowConfirmation onNavigate={() => navigate('/trips')} />
                 )}
-              </motion.div>
-            )}
+            </AnimatePresence>
           </AnimatePresence>
           <div className="h-40" /> {/* Dedicated visibility spacer */}
           <div ref={endRef} />
