@@ -1,4 +1,6 @@
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Bot, User, ShieldCheck, Sparkles, Plane, SendHorizontal, CreditCard, CheckCircle2, MapPin } from "lucide-react";
 import { JourneyRoadmap } from "../components/JourneyRoadmap";
 import { ItineraryCard } from "../components/ItineraryCard";
 import { CheckoutModal } from "../components/CheckoutModal";
@@ -95,6 +97,7 @@ const ChatBubble = ({ msg, isLast }: { msg: Message, isLast: boolean }) => {
   );
 };
 
+export default function Plan() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -109,6 +112,10 @@ const ChatBubble = ({ msg, isLast }: { msg: Message, isLast: boolean }) => {
   const [pendingItinerary, setPendingItinerary] = useState<any>(null);
   
   const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping, showCheckoutModal]);
 
   const handleBook = (itinerary: any) => {
     setPendingItinerary(itinerary);
@@ -297,13 +304,13 @@ const ChatBubble = ({ msg, isLast }: { msg: Message, isLast: boolean }) => {
                     handleSubmit(e as any);
                   }
                 }}
-                disabled={isTyping || showCheckout}
+                disabled={isTyping}
                 placeholder="Tell me where you want to go..."
                 className="flex-1 bg-transparent border-none outline-none py-3.5 text-[15px] resize-none max-h-32 text-foreground placeholder:text-muted-foreground/60 leading-relaxed scrollbar-hide"
               />
               <button
                 type="submit"
-                disabled={!input.trim() || isTyping || showCheckout}
+                disabled={!input.trim() || isTyping}
                 className="h-12 w-12 flex items-center justify-center rounded-2xl bg-gradient-primary text-primary-foreground disabled:opacity-30 hover:opacity-90 transition-all glow-primary active:scale-90 shrink-0"
               >
                 <Plane className="h-5 w-5 -rotate-45 relative right-[1px] bottom-[1px]" />
