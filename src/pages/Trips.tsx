@@ -10,12 +10,13 @@ export default function Trips() {
     { label: "Network Rewards", value: "85 ExF", sub: "Stake: 1,200 EXF", icon: Zap, color: "text-purple-400" }
   ];
 
-  const trips = [
+  const [trips, setTrips] = useState([
     {
       destination: "Uganda Safari",
       dates: "Oct 12 – Oct 17, 2026",
       cost: "1,450 cUSD",
       status: "active",
+      id: "TRP-UG502",
       agents: ["SkyFlow", "StayBot", "LocalGuide"]
     },
     {
@@ -50,7 +51,13 @@ export default function Trips() {
       id: "TRP-BAL88",
       agents: ["SkyFlow", "StayBot", "LocalGuide"]
     },
-  ];
+  ]);
+
+  const handleFinalizePayment = (id: string) => {
+    setTrips(prev => prev.map(t => 
+        t.id === id ? { ...t, status: 'active' } : t
+    ));
+  };
 
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto py-16">

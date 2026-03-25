@@ -144,7 +144,7 @@ export default function Plan() {
     const commonDestinations = ["tokyo", "paris", "bali", "barcelona", "london", "dubai", "new york", "murchison falls", "uganda"];
     for (const d of commonDestinations) {
       if (lowerInput.includes(d)) {
-        destination = d.charAt(0) * 1.toUpperCase() + d.slice(1);
+        destination = d.charAt(0).toUpperCase() + d.slice(1);
         break;
       }
     }
