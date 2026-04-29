@@ -191,7 +191,11 @@ export default function Plan() {
             })
         };
 
-        const response2 = `It would be my pleasure to arrange that for you. I've curated a complete Flow for your trip to ${destination}. Here is your optimized itinerary and Departure Briefing:`;
+        const response2 = `It would be my pleasure to arrange that for you. I've curated a complete Flow for your trip to ${destination}. 
+
+For settlement, I can facilitate an instant orchestration via MTN MoMo or Airtel Money for regional convenience. For international standards, we can utilize Stripe or PayPal, or optimize via MiniPay/Wise for the most efficient path.
+
+Here is your optimized itinerary and Departure Briefing:`;
         
         const roadmap = !isUganda ? [
             { type: 'flight', title: `${destination} Route`, details: 'Optimized flight path found with zero-friction connections.', agent: 'SKYFLOW' },

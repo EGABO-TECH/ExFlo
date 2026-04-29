@@ -67,15 +67,42 @@ export const CheckoutModal = ({ items, total, onConfirm, onClose }: { items: Iti
                 <span className="text-3xl font-display font-bold text-cyan-400">${total}</span>
             </div>
 
-            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6">Payment</h3>
-            <div className="space-y-3 mb-10">
-                <div className="flex items-center gap-4 p-5 rounded-2xl border-2 border-cyan-500/50 bg-cyan-500/10 text-white cursor-pointer group">
-                    <CreditCard className="h-5 w-5 text-cyan-400" />
-                    <span className="font-bold">Card</span>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6">Financial Orchestration</h3>
+            <div className="space-y-4 mb-10">
+                <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/30 hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all cursor-pointer group">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                            <CheckCircle2 className="h-4 w-4" />
+                        </div>
+                        <span className="font-bold text-white text-sm">Regional Excellence</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 leading-relaxed">
+                        Instant settlement via MTN MoMo or Airtel Money for local convenience.
+                    </p>
                 </div>
-                <div className="flex items-center gap-4 p-5 rounded-2xl border border-slate-800 bg-slate-900/50 text-slate-500 cursor-not-allowed opacity-50">
-                    <Wallet className="h-5 w-5" />
-                    <span className="font-bold">MiniPay</span>
+
+                <div className="p-4 rounded-2xl border-2 border-cyan-500/50 bg-cyan-500/10 text-white cursor-pointer group">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="h-8 w-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                            <CreditCard className="h-4 w-4" />
+                        </div>
+                        <span className="font-bold text-sm">International Standards</span>
+                    </div>
+                    <p className="text-[10px] text-cyan-200/50 leading-relaxed">
+                        Secured with world-class encryption via Stripe or PayPal.
+                    </p>
+                </div>
+
+                <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/30 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all cursor-pointer group">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400">
+                            <Wallet className="h-4 w-4" />
+                        </div>
+                        <span className="font-bold text-white text-sm">Web3 & Cross-Border</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 leading-relaxed">
+                        Optimized conversion path via MiniPay or Wise.
+                    </p>
                 </div>
             </div>
           </div>
