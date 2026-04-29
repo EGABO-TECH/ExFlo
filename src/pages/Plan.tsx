@@ -161,8 +161,8 @@ export default function Plan() {
       setIsTyping(false);
       
       const response1 = isUganda 
-        ? `I am currently orchestrating the finer details of your Uganda Protocol. Scanning Entebbe International (EBB) flight corridor and StayBot verifying Serena Hotel suites for ${destination}...`
-        : `I am currently orchestrating the finer details of your itinerary. Global orchestration layer scanning multi-modal logistics for ${destination}...`;
+        ? `I am currently orchestrating the finer details of your Uganda Protocol. We are ascending into the booking layer, verifying seat availability and securing your preferred safari suites. Rest assured, all transactions are encrypted and monitored within the secure ExFlo ecosystem.`
+        : `I am currently orchestrating the finer details of your itinerary. We are ascending into the global orchestration layer to verify multi-modal logistics. Your security is our priority; all connections are encrypted and monitored via ExFlo Nodes.`;
       
       setMessages((prev) => [...prev, { role: "assistant", content: response1, isStreaming: true }]);
       
@@ -191,7 +191,7 @@ export default function Plan() {
             })
         };
 
-        const response2 = `It would be my pleasure to arrange that for you. I've curated a complete Flow for your trip to ${destination}. Here's your optimized itinerary:`;
+        const response2 = `It would be my pleasure to arrange that for you. I've curated a complete Flow for your trip to ${destination}. Here is your optimized itinerary and Departure Briefing:`;
         
         const roadmap = !isUganda ? [
             { type: 'flight', title: `${destination} Route`, details: 'Optimized flight path found with zero-friction connections.', agent: 'SKYFLOW' },

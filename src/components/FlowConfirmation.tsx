@@ -19,9 +19,24 @@ export const FlowConfirmation = ({ onNavigate }: { onNavigate: () => void }) => 
         </div>
 
         <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">Flow Confirmed!</h2>
-        <p className="text-lg text-slate-400 font-medium leading-relaxed mb-12 max-w-[320px]">
-            Your AI Pilot is now monitoring your trip. You'll receive real-time updates.
-        </p>
+        
+        <div className="text-left w-full mb-8 space-y-4">
+          <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+            <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 mb-2">Departure Briefing</h3>
+            <p className="text-sm text-slate-300 leading-relaxed">
+              Your itinerary has been secured. Your dedicated pilot is now orchestrating real-time monitoring of all connections.
+            </p>
+          </div>
+          
+          <div className="flex items-start gap-3 px-2">
+            <div className="h-5 w-5 rounded-full bg-cyan-500/10 flex items-center justify-center shrink-0 mt-0.5">
+              <div className="h-2 w-2 rounded-full bg-cyan-500 animate-pulse" />
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium">
+              Safety First: Your transaction is encrypted and verified within the ExFlo ecosystem.
+            </p>
+          </div>
+        </div>
 
         <button 
           onClick={onNavigate}
