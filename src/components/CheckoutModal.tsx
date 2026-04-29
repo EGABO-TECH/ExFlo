@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Plane, Hotel, MapPin, X, CreditCard, Wallet, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
 
 interface ItineraryItem {
   type: 'flight' | 'hotel' | 'activity';
@@ -9,6 +10,8 @@ interface ItineraryItem {
 }
 
 export const CheckoutModal = ({ items, total, onConfirm, onClose }: { items: ItineraryItem[], total: number, onConfirm: () => void, onClose: () => void }) => {
+  const [selectedMethod, setSelectedMethod] = useState<'regional' | 'international' | 'web3'>('international');
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -69,36 +72,63 @@ export const CheckoutModal = ({ items, total, onConfirm, onClose }: { items: Iti
 
             <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6">Financial Orchestration</h3>
             <div className="space-y-4 mb-10">
-                <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/30 hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all cursor-pointer group">
+                <div 
+                    onClick={() => setSelectedMethod('regional')}
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer group ${
+                        selectedMethod === 'regional' 
+                        ? 'border-emerald-500 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.1)]' 
+                        : 'border-slate-800 bg-slate-900/30 hover:border-slate-700'
+                    }`}
+                >
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                        <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${
+                            selectedMethod === 'regional' ? 'bg-emerald-500 text-slate-900' : 'bg-emerald-500/10 text-emerald-400'
+                        }`}>
                             <CheckCircle2 className="h-4 w-4" />
                         </div>
-                        <span className="font-bold text-white text-sm">Regional Excellence</span>
+                        <span className={`font-bold text-sm transition-colors ${selectedMethod === 'regional' ? 'text-white' : 'text-slate-300'}`}>Regional Excellence</span>
                     </div>
                     <p className="text-[10px] text-slate-500 leading-relaxed">
                         Instant settlement via MTN MoMo or Airtel Money for local convenience.
                     </p>
                 </div>
 
-                <div className="p-4 rounded-2xl border-2 border-cyan-500/50 bg-cyan-500/10 text-white cursor-pointer group">
+                <div 
+                    onClick={() => setSelectedMethod('international')}
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer group ${
+                        selectedMethod === 'international' 
+                        ? 'border-cyan-500 bg-cyan-500/10 shadow-[0_0_20px_rgba(6,182,212,0.1)]' 
+                        : 'border-slate-800 bg-slate-900/30 hover:border-slate-700'
+                    }`}
+                >
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="h-8 w-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                        <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${
+                            selectedMethod === 'international' ? 'bg-cyan-500 text-slate-900' : 'bg-cyan-500/10 text-cyan-400'
+                        }`}>
                             <CreditCard className="h-4 w-4" />
                         </div>
-                        <span className="font-bold text-sm">International Standards</span>
+                        <span className={`font-bold text-sm transition-colors ${selectedMethod === 'international' ? 'text-white' : 'text-slate-300'}`}>International Standards</span>
                     </div>
-                    <p className="text-[10px] text-cyan-200/50 leading-relaxed">
+                    <p className="text-[10px] text-slate-500 leading-relaxed">
                         Secured with world-class encryption via Stripe or PayPal.
                     </p>
                 </div>
 
-                <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/30 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all cursor-pointer group">
+                <div 
+                    onClick={() => setSelectedMethod('web3')}
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer group ${
+                        selectedMethod === 'web3' 
+                        ? 'border-purple-500 bg-purple-500/10 shadow-[0_0_20px_rgba(168,85,247,0.1)]' 
+                        : 'border-slate-800 bg-slate-900/30 hover:border-slate-700'
+                    }`}
+                >
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400">
+                        <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${
+                            selectedMethod === 'web3' ? 'bg-purple-500 text-white' : 'bg-purple-500/10 text-purple-400'
+                        }`}>
                             <Wallet className="h-4 w-4" />
                         </div>
-                        <span className="font-bold text-white text-sm">Web3 & Cross-Border</span>
+                        <span className={`font-bold text-sm transition-colors ${selectedMethod === 'web3' ? 'text-white' : 'text-slate-300'}`}>Web3 & Cross-Border</span>
                     </div>
                     <p className="text-[10px] text-slate-500 leading-relaxed">
                         Optimized conversion path via MiniPay or Wise.
