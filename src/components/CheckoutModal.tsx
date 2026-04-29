@@ -51,7 +51,7 @@ export const CheckoutModal = ({ items, total, onConfirm, onClose }: { items: Iti
         </div>
 
         {/* Right Side: Payment */}
-        <div className="w-full md:w-[400px] bg-slate-900/20 p-10 md:p-14 flex flex-col justify-between">
+        <div className="w-full md:w-[400px] bg-slate-900/20 p-10 md:p-14 flex flex-col justify-between overflow-y-auto">
           <div>
             <h3 className="text-xl font-bold text-white mb-8">Summary</h3>
             <div className="space-y-4 mb-8">
