@@ -1,13 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, User, ShieldCheck, Sparkles, Plane, SendHorizontal, CreditCard, CheckCircle2, MapPin } from "lucide-react";
+import { Bot, User, ShieldCheck, Sparkles, Plane, MapPin } from "lucide-react";
 import { JourneyRoadmap } from "../components/JourneyRoadmap";
 import { ItineraryCard } from "../components/ItineraryCard";
 import { CheckoutModal } from "../components/CheckoutModal";
 import { FlowConfirmation } from "../components/FlowConfirmation";
 import { useNavigate } from "react-router-dom";
+import { BookingController } from "../ai/BookingController";
+import { SmartEscrowService } from "../blockchain/escrow";
+import { MiniPayService } from "../blockchain/minipay";
+import { TripStore } from "../store";
 
-// Force Sync: 2026-03-25T08:44:00Z (Dynamic Destinations)
+// Force Sync: orchestration & Unified Checkout
 
 type Message = {
   role: "assistant" | "user";
@@ -119,14 +123,58 @@ export default function Plan() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping, showCheckoutModal]);
 
-  const handleBook = (itinerary: any) => {
-    setPendingItinerary(itinerary);
+  const handleBook = (itinerary: any, destName: string) => {
+    setPendingItinerary({ ...itinerary, activeDestination: destName });
     setShowCheckoutModal(true);
   };
 
-  const handleFinalConfirm = () => {
-    setShowCheckoutModal(false);
-    setActiveStep("confirmed");
+  const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
+
+  const handleFinalConfirm = async () => {
+    setIsProcessingCheckout(true);
+    try {
+        // 1. Unified Checkout Flow: Connect MiniPay
+        let accounts = [];
+        try {
+            accounts = await MiniPayService.connectWallet();
+        } catch {
+            console.warn("Using fallback wallet for test environment");
+        }
+
+        // 2. Lock Funds via Smart Escrow
+        const dest = pendingItinerary?.activeDestination || "Destination";
+        const txHash = await SmartEscrowService.lockFunds("0xMockVendor...", pendingItinerary.total);
+
+        // 3. Save to Central Store
+        TripStore.addTrip({
+            id: `RES-${Math.floor(Math.random() * 90000) + 10000}`,
+            destination: dest,
+            amount: pendingItinerary.total,
+            status: 'pending_payment', // Which means it's awaiting GPS verification in Escrow
+            txHash: txHash,
+            dates: new Date().toLocaleDateString() + " - " + new Date(Date.now() + 5*86400000).toLocaleDateString(),
+            destinationLat: 2.2289, // Murchison / Mock
+            destinationLon: 31.6569
+        });
+
+        // 4. Update Chat Log
+        setMessages((prev) => [
+            ...prev,
+            {
+                role: "assistant",
+                content: `Successfully locked ${pendingItinerary.total} cUSD in Smart Escrow!`,
+                type: "success",
+                txId: txHash
+            }
+        ]);
+
+        setShowCheckoutModal(false);
+        setActiveStep("confirmed");
+    } catch (e) {
+        console.error(e);
+    } finally {
+        setIsProcessingCheckout(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -157,60 +205,36 @@ export default function Plan() {
     }
 
     // Ultimate Multi-Agent Orchestration Logic
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsTyping(false);
       
-      const response1 = isUganda 
-        ? `I am currently orchestrating the finer details of your Uganda Protocol. We are ascending into the booking layer, verifying seat availability and securing your preferred safari suites. Rest assured, all transactions are encrypted and monitored within the secure ExFlo ecosystem.`
-        : `I am currently orchestrating the finer details of your itinerary. We are ascending into the global orchestration layer to verify multi-modal logistics. Your security is our priority; all connections are encrypted and monitored via ExFlo Nodes.`;
-      
+      const response1 = `AI Pilot engaged. Analyzing routing through Duffel API APIs and sourcing availability for "${userMsg}"...`;
       setMessages((prev) => [...prev, { role: "assistant", content: response1, isStreaming: true }]);
-      
       setIsTyping(true);
+      
+      // Hit the LangChain ReAct Orchestrator directly
+      const dynamicItinerary = await BookingController.planTrip(userMsg) as any;
+
       setTimeout(() => {
         setIsTyping(false);
-        
-        const itinerary = {
-            items: [
-                { type: 'flight', title: `Flight to ${destination}`, details: 'Direct flight — 8h 30m • Day 1, 09:00', price: 680 },
-                { type: 'hotel', title: isUganda ? 'Chobe Safari Lodge' : `${destination} Grand Stay`, details: 'Premium Suite — 5 nights • Day 1 – Day 6', price: 950 },
-                { type: 'activity', title: isUganda ? 'Murchison Falls Drive' : `${destination} City Tour`, details: 'Guided 3-hour experience • Day 2, 10:00', price: 45 },
-                { type: 'activity', title: 'Local Cuisine Experience', details: 'Food tasting with a local chef • Day 3, 19:00', price: 85 },
-                { type: 'flight', title: `Return Flight from ${destination}`, details: 'Direct flight — 9h 10m • Day 6, 18:00', price: 620 }
-            ],
-            total: 2380,
-            onBook: () => handleBook({
-                items: [
-                    { type: 'flight', title: `Flight to ${destination}`, details: 'Direct flight — 8h 30m • Day 1, 09:00', price: 680 },
-                    { type: 'hotel', title: isUganda ? 'Chobe Safari Lodge' : `${destination} Grand Stay`, details: 'Premium Suite — 5 nights • Day 1 – Day 6', price: 950 },
-                    { type: 'activity', title: isUganda ? 'Murchison Falls Drive' : `${destination} City Tour`, details: 'Guided 3-hour experience • Day 2, 10:00', price: 45 },
-                    { type: 'activity', title: 'Local Cuisine Experience', details: 'Food tasting with a local chef • Day 3, 19:00', price: 85 },
-                    { type: 'flight', title: `Return Flight from ${destination}`, details: 'Direct flight — 9h 10m • Day 6, 18:00', price: 620 }
-                ],
-                total: 2380
-            })
-        };
+        dynamicItinerary.onBook = () => handleBook(dynamicItinerary, destination);
 
-        const response2 = `It would be my pleasure to arrange that for you. I've curated a complete Flow for your trip to ${destination}. 
+        const response2 = dynamicItinerary.aiResponse || `I've crafted a complete flow. Here's your itinerary:`;
 
-For settlement, I can facilitate an instant orchestration via MTN MoMo or Airtel Money for regional convenience. For international standards, we can utilize Stripe or PayPal, or optimize via MiniPay/Wise for the most efficient path.
-
-Here is your optimized itinerary and Departure Briefing:`;
-        
-        const roadmap = !isUganda ? [
-            { type: 'flight', title: `${destination} Route`, details: 'Optimized flight path found with zero-friction connections.', agent: 'SKYFLOW' },
-            { type: 'hotel', title: 'Premium Stay', details: 'Accommodation verified via verified network providers.', agent: 'STAYBOT' },
-            { type: 'done', title: 'Ready for Flow', details: 'Agentic sequence complete.', agent: 'AI PILOT' }
-        ] : null;
+        const roadmap = [
+            { type: 'flight', title: 'Route Sync', details: 'Flight path verified.', agent: 'SKYFLOW' },
+            { type: 'hotel', title: 'Premium Stay', details: 'Accommodation sourced.', agent: 'STAYBOT' },
+            { type: 'done', title: 'Ready', details: 'Escrow primed.', agent: 'AI PILOT' }
+        ];
 
         setMessages((prev) => [
             ...prev.map((m, idx) => idx === prev.length - 1 ? { ...m, isStreaming: false } : m), 
-            { role: "assistant", content: response2, isStreaming: true, roadmap: roadmap as any, itinerary: itinerary as any }
+            { role: "assistant", content: response2, isStreaming: true, roadmap: roadmap as any, itinerary: dynamicItinerary as any }
         ]);
 
-      }, 3500);
+      }, 1500);
 
-    }, 1200);
+    }, 800);
   };
 
   const suggestions = [
