@@ -104,7 +104,7 @@ export default function Plan() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hello! I'm your AI Pilot. Where would you like to go? Tell me your destination, dates, and any preferences.",
+      content: "Welcome to ExFlo. I am Ashley, your dedicated pilot. It is a pleasure to have you with us. How may I elevate your journey today?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -161,8 +161,8 @@ export default function Plan() {
       setIsTyping(false);
       
       const response1 = isUganda 
-        ? `SkyFlow Agent initializing Uganda Protocol. Scanning Entebbe International (EBB) flight corridor and StayBot verifying Serena Hotel suites for ${destination}...`
-        : `Agentic Cluster initializing. Global orchestration layer scanning multi-modal logistics for ${destination}...`;
+        ? `I am currently orchestrating the finer details of your Uganda Protocol. Scanning Entebbe International (EBB) flight corridor and StayBot verifying Serena Hotel suites for ${destination}...`
+        : `I am currently orchestrating the finer details of your itinerary. Global orchestration layer scanning multi-modal logistics for ${destination}...`;
       
       setMessages((prev) => [...prev, { role: "assistant", content: response1, isStreaming: true }]);
       
@@ -191,7 +191,7 @@ export default function Plan() {
             })
         };
 
-        const response2 = `Great choice! I've crafted a complete Flow for your trip to ${destination}. Here's your itinerary:`;
+        const response2 = `It would be my pleasure to arrange that for you. I've curated a complete Flow for your trip to ${destination}. Here's your optimized itinerary:`;
         
         const roadmap = !isUganda ? [
             { type: 'flight', title: `${destination} Route`, details: 'Optimized flight path found with zero-friction connections.', agent: 'SKYFLOW' },
@@ -228,7 +228,7 @@ export default function Plan() {
             <Bot className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="font-display font-bold text-foreground leading-tight">AI Pilot</h1>
+            <h1 className="font-display font-bold text-foreground leading-tight">Ashley</h1>
             <p className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Online — Ready to plan
@@ -257,7 +257,7 @@ export default function Plan() {
                 <div className="rounded-2xl px-6 py-4 bg-card/30 text-muted-foreground border border-border/40 backdrop-blur-sm flex flex-col gap-1.5 items-start min-w-[140px]">
                     <div className="flex items-center gap-2">
                     <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary/80">Pilot Orchestrating</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary/80">Ashley Orchestrating</span>
                     </div>
                     <div className="flex gap-2.5 mt-2">
                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
