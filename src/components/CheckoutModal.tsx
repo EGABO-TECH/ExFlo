@@ -19,14 +19,14 @@ export const CheckoutModal = ({ items, total, onConfirm, onClose }: { items: Iti
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-5xl bg-[#0B0F1A] border border-slate-800 rounded-[40px] shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
+        className="w-full max-w-5xl bg-[#0B0F1A] border border-slate-800 rounded-[32px] md:rounded-[40px] shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-y-auto md:overflow-hidden flex flex-col md:flex-row max-h-[95vh] md:max-h-[90vh]"
       >
         <button onClick={onClose} className="absolute top-8 right-8 text-slate-500 hover:text-white transition-colors">
             <X className="h-8 w-8" />
         </button>
 
         {/* Left Side: Review */}
-        <div className="flex-1 p-10 md:p-14 overflow-y-auto border-r border-slate-800/50">
+        <div className="flex-1 p-8 md:p-14 md:overflow-y-auto border-b md:border-b-0 md:border-r border-slate-800/50">
           <h2 className="text-4xl font-bold text-white mb-2 tracking-tight">One-Booking Checkout</h2>
           <p className="text-slate-400 font-medium mb-12">Review your complete Flow and book everything at once.</p>
 
@@ -51,7 +51,7 @@ export const CheckoutModal = ({ items, total, onConfirm, onClose }: { items: Iti
         </div>
 
         {/* Right Side: Payment */}
-        <div className="w-full md:w-[400px] bg-slate-900/20 p-10 md:p-14 flex flex-col justify-between overflow-y-auto">
+        <div className="w-full md:w-[400px] bg-slate-900/20 p-8 md:p-14 flex flex-col justify-between md:overflow-y-auto shrink-0">
           <div>
             <h3 className="text-xl font-bold text-white mb-8">Summary</h3>
             <div className="space-y-4 mb-8">
