@@ -284,6 +284,43 @@ export default function Plan() {
       content: m.content,
     }));
 
+    // ── SIMULATED ORCHESTRATION FALLBACK ──
+    const generateMockResponse = (msg: string) => {
+      const isFlight = /fly|flight|travel|nairobi|london|dubai|paris/i.test(msg);
+      const isHotel = /hotel|stay|accommodation|tokyo/i.test(msg);
+      
+      let manifest: any = null;
+      if (isFlight) {
+        manifest = {
+          type: "flight_manifest",
+          origin: "NBO",
+          destination: "LHR",
+          options: [
+            { tier: "Prime", id: "SIM-001", airline: "British Airways", price: 420, currency: "USD", duration: "8h 45m", origin: "NBO", destination: "LHR" },
+            { tier: "Economic", id: "SIM-002", airline: "Kenya Airways", price: 310, currency: "USD", duration: "12h 10m", origin: "NBO", destination: "LHR" },
+            { tier: "Elite", id: "SIM-003", airline: "Emirates", price: 850, currency: "USD", duration: "7h 15m", origin: "NBO", destination: "LHR" }
+          ]
+        };
+      } else if (isHotel) {
+        manifest = {
+          type: "hotel_briefing",
+          city: "Tokyo",
+          options: [
+            { tier: "Prime", name: "Tokyo Grand Palace", price: 250, rating: 5, amenities: ["Spa", "Pool"] },
+            { tier: "Economic", name: "Shibuya Inn", price: 110, rating: 4, amenities: ["WiFi", "Breakfast"] },
+            { tier: "Elite", name: "The Ritz Tokyo", price: 650, rating: 5, amenities: ["Butler", "Sky Bar"] }
+          ]
+        };
+      }
+
+      return {
+        response: isFlight || isHotel 
+          ? "I have successfully polled the global grids in simulated mode. Please review the curated options below to secure your Flow."
+          : "I am currently operating in simulated mode as the live ExFlo node is unreachable. I can still help you explore the orchestration flow—try asking for a flight from Nairobi to London!",
+        manifest
+      };
+    };
+
     try {
       const res = await fetch(`${BACKEND_URL}/chat`, {
         method: "POST",
@@ -307,17 +344,22 @@ export default function Plan() {
         },
       ]);
     } catch (err) {
-      console.error("Ashley backend unreachable:", err);
+      console.warn("Ashley backend unreachable, switching to simulation:", err);
       if (statusInterval.current) clearInterval(statusInterval.current);
+      
+      // Artificial delay for realism
+      await new Promise(r => setTimeout(r, 1000));
+      
+      const mock = generateMockResponse(userMsg);
       setIsTyping(false);
       setIsOffline(true);
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content:
-            "I'm encountering a disruption on the orchestration layer — it appears the ExFlo node is temporarily offline. Please ensure the backend is running and try again. I will be standing by. 🛡️",
+          content: mock.response,
           isStreaming: true,
+          manifest: mock.manifest,
         },
       ]);
     }
