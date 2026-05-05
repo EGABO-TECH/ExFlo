@@ -177,7 +177,10 @@ export default function Plan() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [sessionId] = useState(() => `session-${Math.random().toString(36).substring(2, 9)}`);
+  const [currentPhase, setCurrentPhase] = useState<string>("DISCOVERY");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isTyping) return;
 
@@ -187,9 +190,8 @@ export default function Plan() {
     setIsTyping(true);
 
     const lowerInput = userMsg.toLowerCase();
-    const isUganda = lowerInput.includes("uganda") || lowerInput.includes("safari") || lowerInput.includes("entebbe") || lowerInput.includes("murchison");
     
-    // Simple destination extraction
+    // Simple destination extraction for local UI state
     let destination = "Your Destination";
     const commonDestinations = ["tokyo", "paris", "bali", "barcelona", "london", "dubai", "new york", "murchison falls", "uganda"];
     for (const d of commonDestinations) {
@@ -199,42 +201,48 @@ export default function Plan() {
       }
     }
     if (destination === "Your Destination") {
-        // Fallback: take the last word if it looks like a place
         const words = userMsg.split(" ");
         if (words.length > 0) destination = words[words.length - 1].replace(/[?!.]/g, "");
     }
 
-    // Ultimate Multi-Agent Orchestration Logic
-    setTimeout(async () => {
-      setIsTyping(false);
-      
-      const response1 = `AI Pilot engaged. Analyzing routing through Duffel API APIs and sourcing availability for "${userMsg}"...`;
-      setMessages((prev) => [...prev, { role: "assistant", content: response1, isStreaming: true }]);
-      setIsTyping(true);
-      
-      // Hit the LangChain ReAct Orchestrator directly
-      const dynamicItinerary = await BookingController.planTrip(userMsg) as any;
-
-      setTimeout(() => {
+    try {
+        // Hit the LangChain StateGraph Orchestrator
+        const dynamicItinerary = await BookingController.planTrip(userMsg, sessionId) as any;
+        
         setIsTyping(false);
-        dynamicItinerary.onBook = () => handleBook(dynamicItinerary, destination);
+        setCurrentPhase(dynamicItinerary.phase || "DISCOVERY");
+        
+        const responseText = dynamicItinerary.aiResponse || "I am processing the details...";
+        
+        // If the pilot has reached the final scheduling phase, present the itinerary
+        if (dynamicItinerary.phase === "SCHEDULING" || dynamicItinerary.phase === "FINISHED") {
+            dynamicItinerary.onBook = () => handleBook(dynamicItinerary, destination);
 
-        const response2 = dynamicItinerary.aiResponse || `I've crafted a complete flow. Here's your itinerary:`;
+            const roadmap = [
+                { type: 'flight', title: 'Route Sync', details: 'Flight path verified.', agent: 'SKYFLOW' },
+                { type: 'hotel', title: 'Premium Stay', details: 'Accommodation sourced.', agent: 'STAYBOT' },
+                { type: 'done', title: 'Ready', details: 'Escrow primed.', agent: 'AI PILOT' }
+            ];
 
-        const roadmap = [
-            { type: 'flight', title: 'Route Sync', details: 'Flight path verified.', agent: 'SKYFLOW' },
-            { type: 'hotel', title: 'Premium Stay', details: 'Accommodation sourced.', agent: 'STAYBOT' },
-            { type: 'done', title: 'Ready', details: 'Escrow primed.', agent: 'AI PILOT' }
-        ];
-
+            setMessages((prev) => [
+                ...prev.map(m => ({ ...m, isStreaming: false })), 
+                { role: "assistant", content: responseText, isStreaming: true, roadmap: roadmap as any, itinerary: dynamicItinerary as any }
+            ]);
+        } else {
+            // In earlier phases (Discovery, Reality Check, Logistics), just return the chat response
+            setMessages((prev) => [
+                ...prev.map(m => ({ ...m, isStreaming: false })), 
+                { role: "assistant", content: responseText, isStreaming: true }
+            ]);
+        }
+    } catch (err) {
+        console.error("Chat error:", err);
+        setIsTyping(false);
         setMessages((prev) => [
-            ...prev.map((m, idx) => idx === prev.length - 1 ? { ...m, isStreaming: false } : m), 
-            { role: "assistant", content: response2, isStreaming: true, roadmap: roadmap as any, itinerary: dynamicItinerary as any }
+            ...prev, 
+            { role: "assistant", content: "I'm having trouble connecting to my central node. Could we try that again?" }
         ]);
-
-      }, 1500);
-
-    }, 800);
+    }
   };
 
   const suggestions = [
@@ -259,7 +267,7 @@ export default function Plan() {
             <h1 className="font-display font-bold text-foreground leading-tight">Ashley</h1>
             <p className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Online — Ready to plan
+              Online — Phase: {currentPhase.replace('_', ' ')}
             </p>
           </div>
         </div>
@@ -285,7 +293,7 @@ export default function Plan() {
                 <div className="rounded-2xl px-6 py-4 bg-card/30 text-muted-foreground border border-border/40 backdrop-blur-sm flex flex-col gap-1.5 items-start min-w-[140px]">
                     <div className="flex items-center gap-2">
                     <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary/80">Ashley Orchestrating</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary/80">Ashley processing... ({currentPhase.replace('_', ' ')})</span>
                     </div>
                     <div className="flex gap-2.5 mt-2">
                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
