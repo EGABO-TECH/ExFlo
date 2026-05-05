@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapPin, Calendar, CreditCard, Activity, Leaf, Zap, Globe, Clock, Sparkles, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
-// Deployment Force Sync: 2026-03-25T03:00:00Z (Interactive Payment & Dynamic Dest)
+import { TripStore, FlowTrip } from "../store";
+import { LocationVerifier } from "../components/LocationVerifier";
 
 export default function Trips() {
   const stats = [
@@ -10,53 +11,21 @@ export default function Trips() {
     { label: "Network Rewards", value: "85 ExF", sub: "Stake: 1,200 EXF", icon: Zap, color: "text-purple-400" }
   ];
 
-  const [trips, setTrips] = useState([
-    {
-      destination: "Uganda Safari",
-      dates: "Oct 12 – Oct 17, 2026",
-      cost: "1,450 cUSD",
-      status: "active",
-      id: "TRP-UG502",
-      agents: ["SkyFlow", "StayBot", "LocalGuide"]
-    },
-    {
-      destination: "Murchison Falls (Reserve)",
-      dates: "Oct 12 – Oct 17, 2026",
-      cost: "1,450 cUSD",
-      status: "pending_payment",
-      id: "RES-UG991",
-      agents: ["SkyFlow", "StayBot", "LocalGuide"]
-    },
-    {
-      destination: "Tokyo, Japan",
-      dates: "Apr 15 – Apr 22, 2026",
-      cost: "$2,840",
-      status: "active",
-      id: "TRP-TYO10",
-      agents: ["SkyFlow", "StayBot"]
-    },
-    {
-      destination: "Barcelona, Spain",
-      dates: "May 10 – May 16, 2026",
-      cost: "$1,920",
-      status: "upcoming",
-      id: "TRP-BCN04",
-      agents: ["SkyFlow"]
-    },
-    {
-      destination: "Bali, Indonesia",
-      dates: "Feb 1 – Feb 10, 2026",
-      cost: "$2,150",
-      status: "completed",
-      id: "TRP-BAL88",
-      agents: ["SkyFlow", "StayBot", "LocalGuide"]
-    },
-  ]);
+  const [trips, setTrips] = useState<FlowTrip[]>([]);
+
+  useEffect(() => {
+    setTrips(TripStore.getTrips());
+    
+    const handleUpdate = () => {
+        setTrips(TripStore.getTrips());
+    };
+    
+    window.addEventListener('exflo_trips_updated', handleUpdate);
+    return () => window.removeEventListener('exflo_trips_updated', handleUpdate);
+  }, []);
 
   const handleFinalizePayment = (id: string) => {
-    setTrips(prev => prev.map(t => 
-        t.id === id ? { ...t, status: 'active' } : t
-    ));
+    TripStore.updateTripStatus(id, 'active');
   };
 
   return (
@@ -130,8 +99,6 @@ export default function Trips() {
                         className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border ${
                             trip.status === "active"
                             ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                            : trip.status === "upcoming"
-                            ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
                             : trip.status === "pending_payment"
                             ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
                             : "bg-secondary/50 text-muted-foreground border-border/50"
@@ -148,7 +115,7 @@ export default function Trips() {
                             <span className="text-[10px] font-mono opacity-50 bg-secondary/30 px-2 py-0.5 rounded uppercase tracking-wider">Node: {trip.id}</span>
                         </div>
                         <div className="flex gap-1.5 ml-2">
-                            {trip.agents.map(a => (
+                            {['SkyFlow', 'StayBot'].map(a => (
                                 <div key={a} className="h-5 w-5 rounded-full border border-border/50 bg-background flex items-center justify-center" title={a}>
                                     <Sparkles className="h-2 w-2 text-primary" />
                                 </div>
@@ -160,17 +127,12 @@ export default function Trips() {
 
                 <div className="flex items-center justify-between lg:justify-end gap-12 pt-8 lg:pt-0 border-t lg:border-t-0 border-border/20">
                     <div className="text-right">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-2 opacity-50">{trip.status === 'pending_payment' ? 'Pending Settlement' : 'Authorized Cost'}</p>
-                    <p className="text-3xl font-display font-bold text-foreground leading-none">{trip.cost}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-2 opacity-50">{trip.status === 'pending_payment' ? 'Pending Escrow Release' : 'Authorized Cost'}</p>
+                    <p className="text-3xl font-display font-bold text-foreground leading-none">{trip.amount} cUSD</p>
                     </div>
                     {trip.status === 'pending_payment' ? (
-                        <button 
-                            onClick={() => handleFinalizePayment(trip.id)}
-                            className="h-14 px-8 rounded-2xl bg-cyan-400 text-slate-900 border border-cyan-400 text-xs font-black uppercase tracking-wider hover:bg-cyan-300 shadow-lg shadow-cyan-500/20 transition-all active:scale-95 flex items-center gap-2"
-                        >
-                            <CreditCard className="h-4 w-4" /> Finalize Payment
-                        </button>
-                    ) : trip.id === "RES-UG991" ? (
+                        <LocationVerifier bookingId={trip.id} onVerified={() => handleFinalizePayment(trip.id)} />
+                    ) : trip.status === "active" ? (
                         <div className="text-emerald-500 font-bold text-xs flex items-center gap-2 bg-emerald-500/10 px-6 py-4 rounded-2xl border border-emerald-500/20">
                             <CheckCircle2 className="h-4 w-4" /> Payment Successful
                         </div>

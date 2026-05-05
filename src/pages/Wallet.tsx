@@ -1,49 +1,45 @@
-import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, Plus, History, Activity, Shield, Cpu, Database, Network } from "lucide-react";
+import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, Plus, History, Activity, Shield, Cpu, Database, Network, MapPin, CheckCircle, Lock } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState, useCallback, useEffect } from "react";
+import { MiniPayService } from "../blockchain/minipay";
+import { SmartEscrowService, EscrowDetails } from "../blockchain/escrow";
+import { TripStore, FlowTrip } from "../store";
+import { LocationVerifier } from "../components/LocationVerifier";
 
 export default function Wallet() {
-  const transactions = [
-    {
-      title: "Murchison Falls (Reserve)",
-      date: "Mar 25, 2026",
-      amount: "1,450 cUSD",
-      type: "out",
-      status: "Pending Settlement",
-      block: "Pending"
-    },
-    {
-      title: "Uganda Safari (Active)",
-      date: "Mar 25, 2026",
-      amount: "1,450 cUSD",
-      type: "out",
-      status: "Verified",
-      block: "14,892,102"
-    },
-    {
-      title: "Flight to Tokyo",
-      date: "Mar 15, 2026",
-      amount: "$890.00",
-      type: "out",
-      status: "Verified",
-      block: "14,888,412"
-    },
-    {
-      title: "Top-up via USDC",
-      date: "Mar 14, 2026",
-      amount: "+$2,000.00",
-      type: "in",
-      status: "Finalized",
-      block: "14,887,201"
-    },
-    {
-      title: "Park Hyatt Tokyo",
-      date: "Mar 14, 2026",
-      amount: "$1,540.00",
-      type: "out",
-      status: "Verified",
-      block: "14,887,005"
-    },
-  ];
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
+
+
+  const [transactions, setTransactions] = useState<FlowTrip[]>([]);
+
+  useEffect(() => {
+      const load = () => setTransactions(TripStore.getTrips().reverse());
+      load();
+      window.addEventListener('exflo_trips_updated', load);
+      return () => window.removeEventListener('exflo_trips_updated', load);
+  }, []);
+
+  const activeEscrow = transactions.find(t => t.status === "pending_payment");
+  const destLat = activeEscrow ? activeEscrow.destinationLat : 2.2289;
+  const destLon = activeEscrow ? activeEscrow.destinationLon : 31.6569;
+
+  const handleConnect = useCallback(async () => {
+    try {
+      setIsConnecting(true);
+      const accounts = await MiniPayService.connectWallet();
+      if (accounts && accounts.length > 0) {
+        setWalletAddress(accounts[0]);
+      }
+    } catch (e) {
+      console.error("Failed to connect MiniPay wallet. Using fallback mock address for testing.", e);
+      setTimeout(() => setWalletAddress("0x742d35Cc6634C0532925a3b844Bc454e4438f44e"), 1000);
+    } finally {
+      setIsConnecting(false);
+    }
+  }, []);
+
+  // Externalized to LocationVerifier.tsx
 
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto py-16">
@@ -54,12 +50,28 @@ export default function Wallet() {
             <Network className="h-4 w-4 text-primary" /> Connected to MiniPay Mainnet • Layer 2 Verified
           </p>
         </div>
-        <div className="flex bg-card/40 border border-border/50 rounded-2xl p-1 px-4 gap-6 items-center backdrop-blur-xl">
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col items-end gap-3">
+          {walletAddress ? (
+            <div className="text-sm font-bold bg-primary/20 text-primary px-4 py-2 rounded-full border border-primary/30 shadow-sm flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none mt-0.5">Syncing</span>
+                Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
             </div>
-            <span className="text-xs font-mono text-primary font-bold">Block 14,892,109</span>
+          ) : (
+            <button 
+              onClick={handleConnect}
+              disabled={isConnecting}
+              className="text-sm font-bold bg-primary text-primary-foreground px-6 py-2 rounded-full hover:scale-105 transition-all shadow-md disabled:opacity-50"
+            >
+              {isConnecting ? "Connecting MiniPay..." : "Connect MiniPay"}
+            </button>
+          )}
+          <div className="flex bg-card/40 border border-border/50 rounded-2xl p-1 px-4 gap-6 items-center backdrop-blur-xl">
+              <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none mt-0.5">Syncing</span>
+              </div>
+              <span className="text-xs font-mono text-primary font-bold">Block 14,892,109</span>
+          </div>
         </div>
       </div>
 
@@ -79,7 +91,7 @@ export default function Wallet() {
               </div>
               <div>
                 <span className="text-xs font-bold uppercase tracking-[0.3em] opacity-60">Verified Liquidity</span>
-                <p className="text-[10px] font-mono opacity-40">0x821D...fA3921</p>
+                <p className="text-[10px] font-mono opacity-40">{walletAddress || "0x••••••••••••"}</p>
               </div>
             </div>
 
@@ -103,38 +115,20 @@ export default function Wallet() {
           </div>
         </motion.div>
 
-        {/* Network Status Side Card */}
+        {/* Feature Interaction Controls */}
         <div className="space-y-6">
-            <div className="p-8 rounded-[32px] border border-border/40 bg-card/20 backdrop-blur-xl">
-                <div className="flex items-center gap-3 mb-6">
-                    <Shield className="h-5 w-5 text- emerald-500" />
-                    <h4 className="font-bold text-sm uppercase tracking-widest text-foreground">Security Layer</h4>
-                </div>
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground font-medium">Protocol</span>
-                        <span className="font-bold text-foreground">ExFlo-v1.4</span>
+            <div className="p-8 rounded-[32px] border border-border/40 bg-card/20 backdrop-blur-xl transition-all">
+                {activeEscrow ? (
+                    <LocationVerifier 
+                        bookingId={activeEscrow.id} 
+                        onVerified={() => window.dispatchEvent(new Event('exflo_trips_updated'))} 
+                    />
+                ) : (
+                    <div className="text-center text-muted-foreground font-medium py-12 flex flex-col items-center gap-4">
+                        <Lock className="h-8 w-8 opacity-20" />
+                        No pending escrows requiring presence verification at this time.
                     </div>
-                    <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground font-medium">Validation Nodes</span>
-                        <span className="font-bold text-emerald-500">12 Online</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground font-medium">Avg Settlement</span>
-                        <span className="font-bold text-foreground">1.8s</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div className="p-8 rounded-[32px] border border-border/40 bg-card/20 backdrop-blur-xl group hover:border-primary/20 transition-all cursor-pointer">
-                <div className="flex items-center gap-3 mb-4">
-                    <Cpu className="h-5 w-5 text-primary" />
-                    <h4 className="font-bold text-sm uppercase tracking-widest text-foreground">Smart Staking</h4>
-                </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed mb-4">
-                    Earn 12.4% APY by participating in journey validation nodes.
-                </p>
-                <div className="text-xl font-display font-bold text-foreground">85.42 EXF</div>
+                )}
             </div>
         </div>
       </div>
@@ -148,28 +142,27 @@ export default function Wallet() {
         </div>
         
         <div className="grid grid-cols-1 gap-4">
-          {transactions.map((tx, i) => (
+          {transactions.map((tx) => (
             <motion.div 
-                key={i} 
+                key={tx.id} 
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
                 className="flex flex-col md:flex-row md:items-center justify-between p-8 rounded-[32px] border border-border/40 bg-card/20 hover:bg-card/40 hover:border-primary/10 transition-all group relative overflow-hidden"
             >
               <div className="absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               
               <div className="flex items-center gap-6 mb-4 md:mb-0">
                 <div className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-all group-hover:rotate-12 ${
-                  tx.type === 'in' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-primary/10 text-primary'
+                  tx.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-primary/10 text-primary'
                 }`}>
-                  {tx.type === 'in' ? <ArrowDownLeft className="h-7 w-7" /> : <ArrowUpRight className="h-7 w-7" />}
+                  {tx.status === 'active' ? <ArrowDownLeft className="h-7 w-7" /> : <ArrowUpRight className="h-7 w-7" />}
                 </div>
                 <div>
-                  <p className="font-bold text-xl text-foreground tracking-tight mb-1">{tx.title}</p>
+                  <p className="font-bold text-xl text-foreground tracking-tight mb-1">{tx.destination}</p>
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">{tx.date}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">{tx.dates.split(' ')[0]}</span>
                     <span className="h-1 w-1 rounded-full bg-border" />
-                    <span className="text-[10px] font-mono text-primary font-bold">BLOCK {tx.block}</span>
+                    <span className="text-[10px] font-mono text-primary font-bold">TX {tx.txHash ? tx.txHash.slice(0,10) : 'Pending'}</span>
                   </div>
                 </div>
               </div>
@@ -177,11 +170,11 @@ export default function Wallet() {
               <div className="flex items-center justify-between md:justify-end gap-12 border-t md:border-t-0 border-border/20 pt-4 md:pt-0">
                 <div className="text-right">
                     <div className="flex items-center gap-2 justify-end mb-1">
-                        <div className={`h-1.5 w-1.5 rounded-full ${tx.status === 'Pending Settlement' ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
-                        <span className={`text-[9px] font-bold uppercase tracking-widest ${tx.status === 'Pending Settlement' ? 'text-amber-500' : 'text-emerald-500'}`}>{tx.status}</span>
+                        <div className={`h-1.5 w-1.5 rounded-full ${tx.status === 'pending_payment' ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+                        <span className={`text-[9px] font-bold uppercase tracking-widest ${tx.status === 'pending_payment' ? 'text-amber-500' : 'text-emerald-500'}`}>{tx.status}</span>
                     </div>
-                    <p className={`text-2xl font-display font-bold ${tx.type === 'in' ? 'text-emerald-500' : tx.status === 'Pending Settlement' ? 'text-foreground/60' : 'text-foreground'}`}>
-                        {tx.amount}
+                    <p className={`text-2xl font-display font-bold ${tx.status === 'active' ? 'text-emerald-500' : tx.status === 'pending_payment' ? 'text-foreground/60' : 'text-foreground'}`}>
+                        {tx.amount} cUSD
                     </p>
                 </div>
                 <button className="h-10 w-10 rounded-xl bg-background border border-border/50 flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all active:scale-90 shadow-sm">
