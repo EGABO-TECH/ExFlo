@@ -1,23 +1,17 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, User, ShieldCheck, Sparkles, Plane, WifiOff } from "lucide-react";
+import { Bot, User, ShieldCheck, Sparkles, Plane, MapPin } from "lucide-react";
 import { JourneyRoadmap } from "../components/JourneyRoadmap";
 import { ItineraryCard } from "../components/ItineraryCard";
 import { CheckoutModal } from "../components/CheckoutModal";
 import { FlowConfirmation } from "../components/FlowConfirmation";
-import { FlightManifestCard } from "../components/FlightManifestCard";
 import { useNavigate } from "react-router-dom";
+import { BookingController } from "../ai/BookingController";
+import { SmartEscrowService } from "../blockchain/escrow";
+import { MiniPayService } from "../blockchain/minipay";
+import { TripStore } from "../store";
 
-// ──────────────────────────────────────────────
-// TYPES
-// ──────────────────────────────────────────────
-type ManifestData = {
-  type: "flight_manifest" | "hotel_briefing";
-  origin?: string;
-  destination?: string;
-  city?: string;
-  options: any[];
-};
+// Force Sync: orchestration & Unified Checkout
 
 type Message = {
   role: "assistant" | "user";
@@ -28,15 +22,10 @@ type Message = {
   isStreaming?: boolean;
   roadmap?: any[];
   itinerary?: any;
-  manifest?: ManifestData | null;
 };
 
-const BACKEND_URL = "http://localhost:8001";
-
-// ──────────────────────────────────────────────
-// TYPEWRITER HOOK
-// ──────────────────────────────────────────────
-const useTypewriter = (text: string, speed: number = 18, active: boolean = false) => {
+// Custom Typewriter Hook
+const useTypewriter = (text: string, speed: number = 20, active: boolean = false) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isDone, setIsDone] = useState(false);
 
@@ -46,6 +35,7 @@ const useTypewriter = (text: string, speed: number = 18, active: boolean = false
       setIsDone(true);
       return;
     }
+
     setDisplayedText("");
     setIsDone(false);
     let i = 0;
@@ -57,29 +47,15 @@ const useTypewriter = (text: string, speed: number = 18, active: boolean = false
         setIsDone(true);
       }
     }, speed);
+
     return () => clearInterval(timer);
   }, [text, speed, active]);
 
   return { displayedText, isDone };
 };
 
-// ──────────────────────────────────────────────
-// CHAT BUBBLE
-// ──────────────────────────────────────────────
-const ChatBubble = ({
-  msg,
-  onSelectFlight,
-  onSelectHotel,
-}: {
-  msg: Message;
-  onSelectFlight: (opt: any) => void;
-  onSelectHotel: (opt: any) => void;
-}) => {
-  const { displayedText, isDone } = useTypewriter(
-    msg.content,
-    15,
-    msg.role === "assistant" && !!msg.isStreaming
-  );
+const ChatBubble = ({ msg, isLast }: { msg: Message, isLast: boolean }) => {
+  const { displayedText, isDone } = useTypewriter(msg.content, 15, msg.role === "assistant" && !!msg.isStreaming);
 
   return (
     <motion.div
@@ -87,35 +63,18 @@ const ChatBubble = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       className={`flex gap-5 ${msg.role === "assistant" ? "flex-row" : "flex-row-reverse"}`}
     >
-      {/* Avatar */}
-      <div
-        className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
-          msg.role === "assistant"
-            ? "bg-primary/10 text-primary border border-primary/20"
-            : "bg-card text-muted-foreground border border-border/50"
-        }`}
-      >
+      <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${msg.role === "assistant" ? "bg-primary/10 text-primary border border-primary/20" : "bg-card text-muted-foreground border border-border/50"
+        }`}>
         {msg.role === "assistant" ? <Bot className="h-5 w-5" /> : <User className="h-5 w-5" />}
       </div>
+      <div className={`rounded-2xl px-6 py-4 max-w-[85%] text-[15px] leading-relaxed shadow-sm transition-all duration-300 ${msg.role === "assistant"
+          ? "bg-card/50 text-foreground border border-border/40 backdrop-blur-sm hover:border-primary/30 hover:bg-card/60"
+          : "bg-primary text-primary-foreground shadow-lg shadow-primary/5 hover:opacity-95"
+        }`}>
+        {msg.role === "assistant" ? displayedText : msg.content}
+        {msg.role === "assistant" && !isDone && <span className="inline-block w-1.5 h-4 bg-primary/40 ml-1 animate-pulse align-middle" />}
 
-      {/* Bubble */}
-      <div
-        className={`rounded-2xl px-6 py-4 max-w-[88%] text-[15px] leading-relaxed shadow-sm transition-all duration-300 ${
-          msg.role === "assistant"
-            ? "bg-card/50 text-foreground border border-border/40 backdrop-blur-sm hover:border-primary/30 hover:bg-card/60"
-            : "bg-primary text-primary-foreground shadow-lg shadow-primary/5 hover:opacity-95"
-        }`}
-      >
-        {/* Message text — with typewriter for streaming */}
-        <span className="whitespace-pre-wrap">
-          {msg.role === "assistant" ? displayedText : msg.content}
-        </span>
-        {msg.role === "assistant" && !isDone && (
-          <span className="inline-block w-1.5 h-4 bg-primary/40 ml-1 animate-pulse align-middle" />
-        )}
-
-        {/* On-chain verification badge */}
-        {msg.type === "success" && isDone && (
+        {msg.type === 'success' && isDone && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -128,43 +87,28 @@ const ChatBubble = ({
           </motion.div>
         )}
 
-        {/* Journey Roadmap */}
         {msg.roadmap && isDone && !msg.itinerary && (
           <JourneyRoadmap events={msg.roadmap} />
         )}
 
-        {/* Itinerary Card */}
         {msg.itinerary && isDone && (
-          <ItineraryCard
-            items={msg.itinerary.items}
-            total={msg.itinerary.total}
-            onBook={() => msg.itinerary.onBook()}
-          />
-        )}
-
-        {/* ✈️ Flight Manifest / Hotel Briefing Cards */}
-        {msg.manifest && isDone && (
-          <FlightManifestCard
-            manifest={msg.manifest}
-            onSelectFlight={onSelectFlight}
-            onSelectHotel={onSelectHotel}
-          />
+            <ItineraryCard 
+                items={msg.itinerary.items} 
+                total={msg.itinerary.total} 
+                onBook={() => msg.itinerary.onBook()} 
+            />
         )}
       </div>
     </motion.div>
   );
 };
 
-// ──────────────────────────────────────────────
-// PLAN PAGE
-// ──────────────────────────────────────────────
 export default function Plan() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content:
-        "Welcome to ExFlo. I am Ashley, your dedicated pilot. It is a pleasure to have you with us. How may I elevate your journey today?",
+      content: "Welcome to ExFlo. I am Ashley, your dedicated pilot. It is a pleasure to have you with us. How may I elevate your journey today?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -172,213 +116,148 @@ export default function Plan() {
   const [activeStep, setActiveStep] = useState<"chat" | "checkout" | "confirmed">("chat");
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [pendingItinerary, setPendingItinerary] = useState<any>(null);
-  const [isOffline, setIsOffline] = useState(false);
-  const [orchestrationStatus, setOrchestrationStatus] = useState("Ashley Orchestrating");
-
-  const statusInterval = useRef<NodeJS.Timeout | null>(null);
-
+  
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping, showCheckoutModal]);
 
-  useEffect(() => {
-    return () => {
-      if (statusInterval.current) clearInterval(statusInterval.current);
-    };
-  }, []);
-
-  // ── Build itinerary from a selected flight ──
-  const buildItineraryFromFlight = useCallback(
-    (option: any) => ({
-      items: [
-        {
-          type: "flight",
-          title: `Flight: ${option.origin} → ${option.destination}`,
-          details: `${option.airline} · ${option.duration} · ${option.tier} Class`,
-          price: option.price,
-        },
-      ],
-      total: option.price,
-    }),
-    []
-  );
-
-  const buildItineraryFromHotel = useCallback(
-    (option: any) => ({
-      items: [
-        {
-          type: "hotel",
-          title: option.name,
-          details: `${option.amenities?.join(" · ")} · ${option.tier} Tier`,
-          price: option.price,
-        },
-      ],
-      total: option.price,
-    }),
-    []
-  );
-
-  const handleBook = useCallback((itinerary: any) => {
-    setPendingItinerary(itinerary);
+  const handleBook = (itinerary: any, destName: string) => {
+    setPendingItinerary({ ...itinerary, activeDestination: destName });
     setShowCheckoutModal(true);
-  }, []);
-
-  const handleFinalConfirm = () => {
-    setShowCheckoutModal(false);
-    setActiveStep("confirmed");
   };
 
-  // ── Flight selection from manifest card ──
-  const handleSelectFlight = useCallback(
-    (option: any) => {
-      handleBook(buildItineraryFromFlight(option));
-    },
-    [handleBook, buildItineraryFromFlight]
-  );
+  const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
 
-  // ── Hotel selection from briefing card ──
-  const handleSelectHotel = useCallback(
-    (option: any) => {
-      handleBook(buildItineraryFromHotel(option));
-    },
-    [handleBook, buildItineraryFromHotel]
-  );
+  const handleFinalConfirm = async () => {
+    setIsProcessingCheckout(true);
+    try {
+        // 1. Unified Checkout Flow: Connect MiniPay
+        let accounts = [];
+        try {
+            accounts = await MiniPayService.connectWallet();
+        } catch {
+            console.warn("Using fallback wallet for test environment");
+        }
 
-  // ──────────────────────────────────────────────
-  // SUBMIT — calls the live backend
-  // ──────────────────────────────────────────────
+        // 2. Lock Funds via Smart Escrow
+        const dest = pendingItinerary?.activeDestination || "Destination";
+        const txHash = await SmartEscrowService.lockFunds("0xMockVendor...", pendingItinerary.total);
+
+        // 3. Save to Central Store
+        TripStore.addTrip({
+            id: `RES-${Math.floor(Math.random() * 90000) + 10000}`,
+            destination: dest,
+            amount: pendingItinerary.total,
+            status: 'pending_payment', // Which means it's awaiting GPS verification in Escrow
+            txHash: txHash,
+            dates: new Date().toLocaleDateString() + " - " + new Date(Date.now() + 5*86400000).toLocaleDateString(),
+            destinationLat: 2.2289, // Murchison / Mock
+            destinationLon: 31.6569
+        });
+
+        // 4. Update Chat Log
+        setMessages((prev) => [
+            ...prev,
+            {
+                role: "assistant",
+                content: `Successfully locked ${pendingItinerary.total} cUSD in Smart Escrow!`,
+                type: "success",
+                txId: txHash
+            }
+        ]);
+
+        setShowCheckoutModal(false);
+        setActiveStep("confirmed");
+    } catch (e) {
+        console.error(e);
+    } finally {
+        setIsProcessingCheckout(false);
+    }
+  };
+
+  const [sessionId] = useState(() => `session-${Math.random().toString(36).substring(2, 9)}`);
+  const [currentPhase, setCurrentPhase] = useState<string>("DISCOVERY");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isTyping) return;
 
     const userMsg = input.trim();
     setInput("");
-    setIsOffline(false);
-
-    // Freeze previous streaming flags and append user message
-    setMessages((prev) => [
-      ...prev.map((m) => ({ ...m, isStreaming: false })),
-      { role: "user", content: userMsg },
-    ]);
+    setMessages((prev) => [...prev.map(m => ({ ...m, isStreaming: false })), { role: "user", content: userMsg }]);
     setIsTyping(true);
-    setOrchestrationStatus("Ashley Orchestrating");
 
-    const statuses = [
-      "Accessing Global Grids",
-      "Scanning Flight Inventories",
-      "Analyzing Best Value Flows",
-      "Curating Hotel Briefings",
-      "Synchronizing Agentic Loop"
-    ];
-    let sIdx = 0;
-    statusInterval.current = setInterval(() => {
-      sIdx = (sIdx + 1) % statuses.length;
-      setOrchestrationStatus(statuses[sIdx]);
-    }, 1800);
-
-    // Build history for multi-turn memory (exclude manifest/roadmap blobs)
-    const historyForApi = messages.map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
-
-    // ── SIMULATED ORCHESTRATION FALLBACK ──
-    const generateMockResponse = (msg: string) => {
-      const isFlight = /fly|flight|travel|nairobi|london|dubai|paris/i.test(msg);
-      const isHotel = /hotel|stay|accommodation|tokyo/i.test(msg);
-      
-      let manifest: any = null;
-      if (isFlight) {
-        manifest = {
-          type: "flight_manifest",
-          origin: "NBO",
-          destination: "LHR",
-          options: [
-            { tier: "Prime", id: "SIM-001", airline: "British Airways", price: 420, currency: "USD", duration: "8h 45m", origin: "NBO", destination: "LHR" },
-            { tier: "Economic", id: "SIM-002", airline: "Kenya Airways", price: 310, currency: "USD", duration: "12h 10m", origin: "NBO", destination: "LHR" },
-            { tier: "Elite", id: "SIM-003", airline: "Emirates", price: 850, currency: "USD", duration: "7h 15m", origin: "NBO", destination: "LHR" }
-          ]
-        };
-      } else if (isHotel) {
-        manifest = {
-          type: "hotel_briefing",
-          city: "Tokyo",
-          options: [
-            { tier: "Prime", name: "Tokyo Grand Palace", price: 250, rating: 5, amenities: ["Spa", "Pool"] },
-            { tier: "Economic", name: "Shibuya Inn", price: 110, rating: 4, amenities: ["WiFi", "Breakfast"] },
-            { tier: "Elite", name: "The Ritz Tokyo", price: 650, rating: 5, amenities: ["Butler", "Sky Bar"] }
-          ]
-        };
+    const lowerInput = userMsg.toLowerCase();
+    
+    // Simple destination extraction for local UI state
+    let destination = "Your Destination";
+    const commonDestinations = ["tokyo", "paris", "bali", "barcelona", "london", "dubai", "new york", "murchison falls", "uganda"];
+    for (const d of commonDestinations) {
+      if (lowerInput.includes(d)) {
+        destination = d.charAt(0).toUpperCase() + d.slice(1);
+        break;
       }
-
-      return {
-        response: isFlight || isHotel 
-          ? "I have successfully polled the global grids in simulated mode. Please review the curated options below to secure your Flow."
-          : "I am currently operating in simulated mode as the live ExFlo node is unreachable. I can still help you explore the orchestration flow—try asking for a flight from Nairobi to London!",
-        manifest
-      };
-    };
+    }
+    if (destination === "Your Destination") {
+        const words = userMsg.split(" ");
+        if (words.length > 0) destination = words[words.length - 1].replace(/[?!.]/g, "");
+    }
 
     try {
-      const res = await fetch(`${BACKEND_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg, history: historyForApi }),
-      });
+        // Hit the LangChain StateGraph Orchestrator
+        const dynamicItinerary = await BookingController.planTrip(userMsg, sessionId) as any;
+        
+        setIsTyping(false);
+        setCurrentPhase(dynamicItinerary.phase || "DISCOVERY");
+        
+        const responseText = dynamicItinerary.aiResponse || "I am processing the details...";
+        
+        // If the pilot has reached the final scheduling phase, present the itinerary
+        if (dynamicItinerary.phase === "SCHEDULING" || dynamicItinerary.phase === "FINISHED") {
+            dynamicItinerary.onBook = () => handleBook(dynamicItinerary, destination);
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const roadmap = [
+                { type: 'flight', title: 'Route Sync', details: 'Flight path verified.', agent: 'SKYFLOW' },
+                { type: 'hotel', title: 'Premium Stay', details: 'Accommodation sourced.', agent: 'STAYBOT' },
+                { type: 'done', title: 'Ready', details: 'Escrow primed.', agent: 'AI PILOT' }
+            ];
 
-      const data = await res.json();
-
-      if (statusInterval.current) clearInterval(statusInterval.current);
-      setIsTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: data.response,
-          isStreaming: true,
-          manifest: data.manifest ?? null,
-        },
-      ]);
+            setMessages((prev) => [
+                ...prev.map(m => ({ ...m, isStreaming: false })), 
+                { role: "assistant", content: responseText, isStreaming: true, roadmap: roadmap as any, itinerary: dynamicItinerary as any }
+            ]);
+        } else {
+            // In earlier phases (Discovery, Reality Check, Logistics), just return the chat response
+            setMessages((prev) => [
+                ...prev.map(m => ({ ...m, isStreaming: false })), 
+                { role: "assistant", content: responseText, isStreaming: true }
+            ]);
+        }
     } catch (err) {
-      console.warn("Ashley backend unreachable, switching to simulation:", err);
-      if (statusInterval.current) clearInterval(statusInterval.current);
-      
-      // Artificial delay for realism
-      await new Promise(r => setTimeout(r, 1000));
-      
-      const mock = generateMockResponse(userMsg);
-      setIsTyping(false);
-      setIsOffline(true);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: mock.response,
-          isStreaming: true,
-          manifest: mock.manifest,
-        },
-      ]);
+        console.error("Chat error:", err);
+        setIsTyping(false);
+        setMessages((prev) => [
+            ...prev, 
+            { role: "assistant", content: "I'm having trouble connecting to my central node. Could we try that again?" }
+        ]);
     }
   };
 
   const suggestions = [
-    "Fly from Nairobi to London on June 15th",
-    "Find me a hotel in Tokyo",
     "Plan a 5-day Uganda Safari",
-    "Flight from Dubai to Barcelona on July 20th",
+    "Tokyo Spiritual Retreat",
+    "Beach vacation in Bali",
+    "3-day trip to Barcelona"
   ];
 
   return (
     <div className="h-full flex flex-col bg-[#0A0A0B] relative overflow-hidden font-sans">
-      {/* Ambient glows */}
+      {/* Background Decor */}
       <div className="absolute top-1/4 -right-20 w-80 h-80 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
-      {/* Header */}
       <header className="h-16 flex items-center border-b border-border/10 px-6 bg-[#0A0A0B]/80 backdrop-blur-md sticky top-0 z-30 shrink-0">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
@@ -387,93 +266,72 @@ export default function Plan() {
           <div>
             <h1 className="font-display font-bold text-foreground leading-tight">Ashley</h1>
             <p className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-              {isOffline ? (
-                <>
-                  <WifiOff className="h-2.5 w-2.5 text-amber-500" />
-                  <span className="text-amber-500">Reconnecting…</span>
-                </>
-              ) : (
-                <>
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Online — Ready to plan
-                </>
-              )}
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Online — Phase: {currentPhase.replace('_', ' ')}
             </p>
           </div>
         </div>
       </header>
 
-      {/* Chat messages */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-8 pb-[380px] scroll-smooth">
         <div className="max-w-3xl mx-auto flex flex-col gap-8">
           <AnimatePresence initial={false}>
             {messages.map((msg, i) => (
-              <ChatBubble
-                key={i}
-                msg={msg}
-                onSelectFlight={handleSelectFlight}
-                onSelectHotel={handleSelectHotel}
-              />
+              <ChatBubble key={i} msg={msg} isLast={i === messages.length - 1} />
             ))}
 
-            {/* Ashley Typing Indicator */}
             {isTyping && (
-              <motion.div
+                <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 className="flex gap-5 flex-row"
-              >
+                >
                 <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
-                  <Bot className="h-5 w-5" />
+                    <Bot className="h-5 w-5" />
                 </div>
-                <div className="rounded-2xl px-6 py-4 bg-card/30 text-muted-foreground border border-border/40 backdrop-blur-sm flex flex-col gap-1.5 items-start min-w-[160px]">
-                  <div className="flex items-center gap-2">
+                <div className="rounded-2xl px-6 py-4 bg-card/30 text-muted-foreground border border-border/40 backdrop-blur-sm flex flex-col gap-1.5 items-start min-w-[140px]">
+                    <div className="flex items-center gap-2">
                     <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary/80 min-w-[140px]">
-                      {orchestrationStatus}
-                    </span>
-                  </div>
-                  <div className="flex gap-2.5 mt-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary/80">Ashley processing... ({currentPhase.replace('_', ' ')})</span>
+                    </div>
+                    <div className="flex gap-2.5 mt-2">
                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]" />
                     <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" />
-                  </div>
+                    </div>
                 </div>
-              </motion.div>
+                </motion.div>
             )}
 
-            {/* Checkout Modal inline */}
             <AnimatePresence>
-              {showCheckoutModal && pendingItinerary && (
-                <CheckoutModal
-                  items={pendingItinerary.items}
-                  total={pendingItinerary.total}
-                  onConfirm={handleFinalConfirm}
-                  onClose={() => setShowCheckoutModal(false)}
-                />
-              )}
-              {activeStep === "confirmed" && (
-                <FlowConfirmation onNavigate={() => navigate("/trips")} />
-              )}
+                {showCheckoutModal && pendingItinerary && (
+                    <CheckoutModal 
+                        items={pendingItinerary.items} 
+                        total={pendingItinerary.total} 
+                        onConfirm={handleFinalConfirm}
+                        onClose={() => setShowCheckoutModal(false)}
+                    />
+                )}
+                {activeStep === "confirmed" && (
+                    <FlowConfirmation onNavigate={() => navigate('/trips')} />
+                )}
             </AnimatePresence>
           </AnimatePresence>
-
-          <div className="h-40" />
+          <div className="h-40" /> {/* Dedicated visibility spacer */}
           <div ref={endRef} />
         </div>
       </div>
 
-      {/* Input Area */}
+      {/* Input Container - Redesigned for Ergonomics */}
       <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 pointer-events-none">
         <div className="max-w-3xl mx-auto pointer-events-auto">
-          {/* Suggestion chips (show on first message only) */}
           {messages.length === 1 && !isTyping && (
             <div className="flex flex-wrap gap-2.5 mb-6 justify-center">
-              {suggestions.map((s) => (
+              {suggestions.map(s => (
                 <button
                   key={s}
-                  onClick={() => setInput(s)}
+                  onClick={() => { setInput(s); }}
                   className="px-4 py-2 rounded-2xl border border-border/30 bg-card/50 text-[11px] font-semibold text-muted-foreground hover:border-primary/40 hover:text-primary transition-all backdrop-blur-xl shadow-sm"
                 >
                   {s}
@@ -482,26 +340,24 @@ export default function Plan() {
             </div>
           )}
 
-          {/* Input box */}
           <div className="relative group">
+            {/* Glossy Wrapper */}
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-[30px] opacity-0 group-focus-within:opacity-100 blur transition duration-500" />
-            <form
-              onSubmit={handleSubmit}
-              className="relative flex items-end gap-3 bg-card border border-border/60 rounded-[28px] p-2 pl-6 pr-2 shadow-2xl backdrop-blur-3xl overflow-hidden min-h-[64px]"
-            >
+
+            <form onSubmit={handleSubmit} className="relative flex items-end gap-3 bg-card border border-border/60 rounded-[28px] p-2 pl-6 pr-2 shadow-2xl backdrop-blur-3xl overflow-hidden min-h-[64px]">
               <textarea
                 autoFocus
                 rows={1}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
+                  if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSubmit(e as any);
                   }
                 }}
                 disabled={isTyping}
-                placeholder="Tell me where you want to go…"
+                placeholder="Tell me where you want to go..."
                 className="flex-1 bg-transparent border-none outline-none py-3.5 text-[15px] resize-none max-h-32 text-foreground placeholder:text-muted-foreground/60 leading-relaxed scrollbar-hide"
               />
               <button
